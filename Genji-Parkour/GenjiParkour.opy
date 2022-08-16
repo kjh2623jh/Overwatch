@@ -72,6 +72,8 @@ globalvar CpSize
 globalvar PioneerHud 
 globalvar Pioneer 
 globalvar PioneerMinDistans
+globalvar PlayerList
+globalvar CheckPointList
 globalvar Dva
 
 playervar check_point 
@@ -82,6 +84,9 @@ playervar is_invincible
 playervar pioneer_ability
 playervar ability
 playervar ultimate
+playervar name
+playervar player_index
+playervar save_temp
 
 subroutine save 
 subroutine toCheckPoint 
@@ -92,8 +97,18 @@ subroutine abilityReset
 def save():
     @Name "paste here"
 
-    # CheckPoint = [vect(0.235, 6.949, -54.319), vect(-4.961, 6.96, -70.946), vect(-15.015, 6.947, -53.262), ...]
-
+    /*
+    GameMode = "제작: <name>"
+    CheckPoint = [vect(0.235, 6.949, -54.319), vect(-4.961, 6.96, -70.946), vect(-15.015, 6.947, -53.262), ...]
+    PioneerArr = ["name", "name", "name", ...]
+    AbilityArr = [0, 1, 2, 1, 1, 2, 0, 0, 1, 0, ...]
+    UltimateArr = [0, 1, 2, 0, 1, 0, 0, 1, 1, 0, ...]
+    CpSize = 1.5
+    PioneerHud = null
+    Pioneer = <player name>
+    PioneerMinDistans = 7
+    Dva = null
+    */
 
 rule "Init":
     disableInspector()
@@ -110,15 +125,20 @@ rule "Init":
     if not hostPlayer.hasSpawned():
         Pioneer = random.choice(getPlayers(Team.ALL))
     PioneerMinDistans = createWorkshopSetting(int[1:20], "Setting", "개척 최소 거리", 7, 0)
-
-    hudHeader(getAllPlayers(), "{0}".format(["개척 모드", "제작 모드"][GameMode]), HudPosition.TOP, -2, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudHeader(Pioneer, "press {0}: 모드 변경".format(buttonString(Button.INTERACT)), HudPosition.TOP, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    PioneerHud.append(getLastCreatedText())
-    hudHeader(getAllPlayers(), "{0}님 시작할 장소로 가 {1}를 누르세요.".format(Pioneer, buttonString(Button.RELOAD)), HudPosition.TOP, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    PioneerHud.append(getLastCreatedText())
+    PlayerList = []
+    CheckPointList = []
+    save()
     # 시간제한은 없고 기술제한은 기본적으로 존재 ( 완성된 맵에서는 시간 있음 )
-    hudHeader(Pioneer if Pioneer.is_pioneering else null, "개척해주세요", HudPosition.TOP, -1, Color.PURPLE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
-    hudHeader(getAllPlayers() if Pioneer.is_pioneering else null, "개척자: {0}".format(Pioneer), HudPosition.TOP, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    if CheckPoint:
+        hudHeader(getAllPlayers(), GameMode, HudPosition.TOP, -2, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    else:
+        hudHeader(getAllPlayers(), "{0}".format(["개척 모드", "제작 모드"][GameMode]), HudPosition.TOP, -2, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+        hudHeader(Pioneer, "press {0}: 모드 변경".format(buttonString(Button.INTERACT)), HudPosition.TOP, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+        PioneerHud.append(getLastCreatedText())
+        hudHeader(getAllPlayers(), "{0}님 시작할 장소로 가 {1}를 누르세요.".format(Pioneer, buttonString(Button.RELOAD)), HudPosition.TOP, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+        PioneerHud.append(getLastCreatedText())
+        hudHeader(Pioneer if Pioneer.is_pioneering else null, "개척해주세요", HudPosition.TOP, -1, Color.PURPLE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+        hudHeader(getAllPlayers() if Pioneer.is_pioneering else null, "개척자: {0}".format(Pioneer), HudPosition.TOP, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), "{0}/270m".format(floor(getTotalTimeElapsed()/60)), HudPosition.LEFT, 0, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
 
 
@@ -136,6 +156,15 @@ rule "Player Joined":
     eventPlayer.enableDeathSpectateTargetHud()
     eventPlayer.setAbility2Enabled(false)
     eventPlayer.disablePlayerCollision()
+    eventPlayer.name = "{0}".format(eventPlayer)
+    if eventPlayer.name in PlayerList:
+        eventPlayer.player_index = PlayerList.index(eventPlayer.name)
+        eventPlayer.check_point = CheckPointList[eventPlayer.player_index]
+        eventPlayer.arrived_check_point = eventPlayer.check_point
+    else:
+        eventPlayer.player_index = len(PlayerList)
+        PlayerList.append(eventPlayer.name)
+        CheckPointList.append(eventPlayer.check_point)
     createEffect(eventPlayer, Effect.RING, Color.BLUE, CheckPoint[eventPlayer.check_point], CpSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
     createEffect([player for player in eventPlayer if CheckPoint[eventPlayer.check_point+1]], Effect.RING, Color.PURPLE, CheckPoint[eventPlayer.check_point+1], CpSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
     createInWorldText(eventPlayer if CheckPoint[eventPlayer.check_point + 1] else null, "다음 개척지\n개척자: {0}".format(PioneerArr[eventPlayer.check_point+1]), CheckPoint[eventPlayer.check_point+1], 1.5, Clip.NONE, WorldTextReeval.VISIBILITY_POSITION_AND_STRING, Color.PURPLE, SpecVisibility.DEFAULT)
@@ -218,7 +247,7 @@ rule "Pioneer":
     @Condition distance(eventPlayer, CheckPoint[eventPlayer.check_point]) > PioneerMinDistans
 
     CheckPoint.append(eventPlayer.getPosition())
-    PioneerArr.append("{0}".format(eventPlayer))
+    PioneerArr.append(eventPlayer.name)
     # AbilityArr.append(eventPlayer.pioneer_ability)
     AbilityArr.append(eventPlayer.ability)
     UltimateArr.append(eventPlayer.ultimate)
@@ -259,12 +288,9 @@ rule "Arrive":
         eventPlayer.is_pioneering = true
         eventPlayer.setAbility1Enabled(true)
         eventPlayer.setUltEnabled(true)
-    else:
-        pass
-        
-
     if eventPlayer.check_point > eventPlayer.arrived_check_point:
         eventPlayer.arrived_check_point = eventPlayer.check_point
+        CheckPointList[eventPlayer.player_index] = eventPlayer.arrived_check_point
 
 
 rule "Finish": # if this workshop is finished map
@@ -279,6 +305,8 @@ rule "Restart":
     @Condition eventPlayer.isHoldingButton(Button.ULTIMATE)
 
     eventPlayer.check_point = 0
+    eventPlayer.arrived_check_point = 0
+    CheckPointList[eventPlayer.player_index] = 0
 
 
 rule "Reset":
@@ -415,7 +443,15 @@ rule "Dva":
 
 rule "Save Inspector":
     @Condition hostPlayer.isHoldingButton(Button.MELEE)
+    @Condition hostPlayer.isHoldingButton(Button.RELOAD)
     @Condition hostPlayer.isStanding()
 
+    GameMode = "제작: {0}".format(hostPlayer)
+    hostPlayer.save_temp = []
+    hostPlayer.save_temp.append(PlayerList)
+    hostPlayer.save_temp.append(CheckPointList)
     enableInspector()
     disableInspector()
+    PlayerList = hostPlayer.save_temp[0]
+    CheckPointList = hostPlayer.save_temp[1]
+    hostPlayer.save_temp = []
