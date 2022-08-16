@@ -75,6 +75,7 @@ globalvar PioneerMinDistans
 globalvar PlayerList
 globalvar CheckPointList
 globalvar Dva
+# globalvar Finished
 
 playervar check_point 
 playervar arrived_check_point
@@ -97,6 +98,7 @@ subroutine abilityReset
 def save():
     @Name "paste here"
 
+    smallMessage(hostPlayer, "Delete it")
     /*
     GameMode = "제작: <name>"
     CheckPoint = [vect(0.235, 6.949, -54.319), vect(-4.961, 6.96, -70.946), vect(-15.015, 6.947, -53.262), ...]
@@ -131,6 +133,7 @@ rule "Init":
     # 시간제한은 없고 기술제한은 기본적으로 존재 ( 완성된 맵에서는 시간 있음 )
     if CheckPoint:
         hudHeader(getAllPlayers(), GameMode, HudPosition.TOP, -2, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+        # Finished = true
     else:
         hudHeader(getAllPlayers(), "{0}".format(["개척 모드", "제작 모드"][GameMode]), HudPosition.TOP, -2, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         hudHeader(Pioneer, "press {0}: 모드 변경".format(buttonString(Button.INTERACT)), HudPosition.TOP, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
@@ -165,6 +168,8 @@ rule "Player Joined":
         eventPlayer.player_index = len(PlayerList)
         PlayerList.append(eventPlayer.name)
         CheckPointList.append(eventPlayer.check_point)
+    if CheckPoint == false:
+        eventPlayer.is_invincible = true
     createEffect(eventPlayer, Effect.RING, Color.BLUE, CheckPoint[eventPlayer.check_point], CpSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
     createEffect([player for player in eventPlayer if CheckPoint[eventPlayer.check_point+1]], Effect.RING, Color.PURPLE, CheckPoint[eventPlayer.check_point+1], CpSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
     createInWorldText(eventPlayer if CheckPoint[eventPlayer.check_point + 1] else null, "다음 개척지\n개척자: {0}".format(PioneerArr[eventPlayer.check_point+1]), CheckPoint[eventPlayer.check_point+1], 1.5, Clip.NONE, WorldTextReeval.VISIBILITY_POSITION_AND_STRING, Color.PURPLE, SpecVisibility.DEFAULT)
@@ -184,6 +189,7 @@ rule "Create First Checkpoint":
     destroyHudText(PioneerHud[2])
     PioneerHud = null
     Pioneer.is_pioneering = true
+    Pioneer.is_invincible = false
     CheckPoint = [Pioneer.getPosition()]
     PioneerArr = ["{0}".format(Pioneer)]
     AbilityArr = [0]
@@ -255,7 +261,7 @@ rule "Pioneer":
         eventPlayer.is_float = true
         eventPlayer.is_pioneering = false
         toCheckPoint()
-        eventAbility.is_float = false
+        eventPlayer.is_float = false
     else:
         abilityReset()
         eventPlayer.check_point += 1
@@ -269,6 +275,7 @@ rule "Pioneered":
     @Condition Pioneer.is_pioneering == false
 
     toCheckPoint()
+    eventPlayer.is_invincible = false
     smallMessage(eventPlayer, "pioneered")
     
     
@@ -283,7 +290,7 @@ rule "Arrive":
     
     eventPlayer.check_point+=1
     abilityReset()
-    if eventPlayer.check_point == len(CheckPoint)-1 and (eventPlayer != Pioneer and not Pioneer.is_pioneering or getNumberOfPlayers(Team.ALL) == 1):
+    if eventPlayer.check_point == len(CheckPoint)-1 and (eventPlayer != Pioneer and not Pioneer.is_pioneering or getNumberOfPlayers(Team.ALL) == 1) and GameMode == false: # (and GameMode == false) 임시임
         Pioneer = eventPlayer
         eventPlayer.is_pioneering = true
         eventPlayer.setAbility1Enabled(true)
@@ -295,7 +302,11 @@ rule "Arrive":
 
 rule "Finish": # if this workshop is finished map
     @Event eachPlayer
-    @Condition eventPlayer.check_point == len(CheckPoint)-1
+    @Condition eventPlayer.arrived_check_point == len(CheckPoint)-1
+    # @Condition Finished
+    @Condition GameMode # 임시임
+
+    bigMessage(eventPlayer, "Clear!!")
 
 
 rule "Restart":
@@ -304,9 +315,12 @@ rule "Restart":
     @Condition eventPlayer.isHoldingButton(Button.ABILITY_1)
     @Condition eventPlayer.isHoldingButton(Button.ULTIMATE)
 
+    eventPlayer.is_float = true
     eventPlayer.check_point = 0
     eventPlayer.arrived_check_point = 0
     CheckPointList[eventPlayer.player_index] = 0
+    toCheckPoint()
+    eventPlayer.is_float = false
 
 
 rule "Reset":
@@ -369,6 +383,7 @@ rule "Invincible Mode":
     @Event eachPlayer
     @Condition eventPlayer.isHoldingButton(Button.INTERACT)
     @Condition eventPlayer.isHoldingButton(Button.MELEE)
+    @Condition CheckPoint
 
     if eventPlayer.is_invincible:
         eventPlayer.is_invincible = false
@@ -426,7 +441,7 @@ rule "Revive":
 
 
 rule "Dva":
-    @Condition isGameInProgress()
+    @Condition getNumberOfPlayers(Team.1) < 12
 
     wait(2)
     createDummy(Hero.DVA, Team.1, -1, vect(0, 0, 0), vect(0, 0, 0))
@@ -434,8 +449,10 @@ rule "Dva":
     wait(1)
     Dva.setInvisibility(Invis.ALL)
     Dva.startForcingPosition(vect(0, 0, 0), true)
-    Dva.startScalingSize(100, true)
+    Dva.setUltEnabled(true)
+    Dva.setUltCharge(100)
     Dva.disableEnvironmentCollision(true)
+    Dva.startScalingSize(100, true)
     Dva.forceButtonPress(Button.ULTIMATE)
     wait(3)
     destroyAllDummies()
@@ -446,10 +463,12 @@ rule "Save Inspector":
     @Condition hostPlayer.isHoldingButton(Button.RELOAD)
     @Condition hostPlayer.isStanding()
 
-    GameMode = "제작: {0}".format(hostPlayer)
+    GameMode = "제작: {0}".format(hostPlayer) # GameMode 는 건들면 안될지도? inspector 저장 하면 개척모드이거나 제작모드로 들어가있던 hud가 0으로 변해버림
     hostPlayer.save_temp = []
     hostPlayer.save_temp.append(PlayerList)
     hostPlayer.save_temp.append(CheckPointList)
+    PlayerList = []
+    CheckPointList = []
     enableInspector()
     disableInspector()
     PlayerList = hostPlayer.save_temp[0]
