@@ -299,6 +299,7 @@ rule "Pioneer":
         else:
             eventPlayer.check_point += 1
             eventPlayer.arrived_check_point += 1
+            CheckPointList[eventPlayer.player_index] += 1
         toCheckPoint()
     eventPlayer.is_float = false
     
@@ -336,8 +337,8 @@ rule "Arrive":
             invincibleMode()
     abilityReset()
     if eventPlayer.check_point > eventPlayer.arrived_check_point:
-        eventPlayer.arrived_check_point = eventPlayer.check_point
-        CheckPointList[eventPlayer.player_index] = eventPlayer.arrived_check_point
+        eventPlayer.arrived_check_point += 1
+        CheckPointList[eventPlayer.player_index] += 1
 
 
 rule "Finish": # if this workshop is finished map
