@@ -92,6 +92,7 @@ playervar ultimate
 playervar name
 playervar player_index
 playervar save_temp
+playervar is_last_check_point
 
 subroutine save 
 subroutine toCheckPoint 
@@ -147,7 +148,7 @@ rule "Init":
         hudHeader(Pioneer if Pioneer.is_pioneering else null, "개척해주세요", HudPosition.TOP, -1, Color.PURPLE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
         hudHeader(getAllPlayers() if Pioneer.is_pioneering else null, "개척자: {0}".format(Pioneer), HudPosition.TOP, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         createEffect(Pioneer if PioneerCancelTimer else null, Effect.RING, Color.RED, PioneerPosition, CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
-        hudHeader(Pioneer if PioneerCancelTimer else null, "Pioneer cancel: {0}".format(buttonString(Button.PRIMARY_FIRE)), HudPosition.TOP, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+        hudHeader(Pioneer if PioneerCancelTimer else null, "Cancel: {0} | Confirm: {1} {2}".format(buttonString(Button.PRIMARY_FIRE), buttonString(Button.SECONDARY_FIRE), ceil(PioneerCancelTimer)), HudPosition.TOP, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), "{0}/270m".format(floor(getTotalTimeElapsed()/60)), HudPosition.LEFT, 0, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     chase(PioneerCancelTimer, 0, rate=1, ChaseReeval.NONE)
 
@@ -232,23 +233,11 @@ rule "Die":
     @Event eachPlayer
     @Condition eventPlayer.isOnGround()
     @Condition eventPlayer.is_invincible == false
-    @Condition CheckPoint[eventPlayer.check_point + 1]
     @Condition distance(eventPlayer, CheckPoint[eventPlayer.check_point]) > CheckPointSize
-    @Condition distance(eventPlayer, CheckPoint[eventPlayer.check_point+1]) > CheckPointSize
 
-    toCheckPoint()
-
-
-rule "Pioneer Die":
-    @Event eachPlayer
-    @Condition eventPlayer.isOnGround()
-    @Condition eventPlayer == Pioneer
-    @Condition eventPlayer.is_pioneering == true
-    @Condition eventPlayer.is_invincible == false
-    @Condition distance(eventPlayer, CheckPoint[eventPlayer.check_point]) > CheckPointSize
-    @Condition distance(eventPlayer, CheckPoint[eventPlayer.check_point]) <= PioneerMinDistans
-
-    toCheckPoint()
+    if (CheckPoint[eventPlayer.check_point + 1] and distance(eventPlayer, CheckPoint[eventPlayer.check_point+1]) > CheckPointSize) \
+        or (eventPlayer.is_pioneering and distance(eventPlayer, CheckPoint[eventPlayer.check_point]) <= PioneerMinDistans):
+        toCheckPoint()
 
 
 rule "Pioneer":
@@ -259,41 +248,35 @@ rule "Pioneer":
     @Condition eventPlayer.isOnGround()
     @Condition distance(eventPlayer, CheckPoint[eventPlayer.check_point]) > PioneerMinDistans
 
+    eventPlayer.is_invincible = true
+    eventPlayer.setAbilityCooldown(Button.ABILITY_1, 0)
     PioneerPosition = eventPlayer.getPosition()
     PioneerCancelTimer = PioneerCancelTime
-    waitUntil(eventPlayer.isHoldingButton(Button.PRIMARY_FIRE), PioneerCancelTime)
-    if PioneerCancel:
-        PioneerCancelTimer = 0
+    waitUntil(eventPlayer.isHoldingButton(Button.PRIMARY_FIRE) or eventPlayer.isHoldingButton(Button.SECONDARY_FIRE), PioneerCancelTime)
+    if eventPlayer.isHoldingButton(Button.PRIMARY_FIRE):
         toCheckPoint()
     else:
         CheckPoint.append(PioneerPosition)
         PioneerArr.append(eventPlayer.name)
         AbilityArr.append(eventPlayer.ability)
         UltimateArr.append(eventPlayer.ultimate)
+        eventPlayer.is_float = true
         if getNumberOfPlayers(Team.ALL) > 1 or eventPlayer.isHoldingButton(Button.INTERACT):
-            eventPlayer.is_float = true
             eventPlayer.is_pioneering = false
-            toCheckPoint()
-            eventPlayer.is_float = false
         else:
             eventPlayer.check_point += 1
             eventPlayer.arrived_check_point += 1
-            abilityReset()
-    
-
-rule "Pioneer Cancel":
-    @Event eachPlayer
-    @Condition PioneerCancelTimer == true
-    @Condition eventPlayer.isHoldingButton(Button.PRIMARY_FIRE)
-
-    PioneerCancel = true
+        toCheckPoint()
+        eventPlayer.is_float = false
+    PioneerCancelTimer = 0
+    eventPlayer.is_invincible = false
 
 
 rule "Pioneered":
     @Event eachPlayer
-    @Condition eventPlayer.check_point == len(CheckPoint)-1
+    @Condition eventPlayer.is_last_check_point
+    @Condition CheckPoint[eventPlayer.check_point + 1] == true
     @Condition eventPlayer != Pioneer
-    @Condition Pioneer.is_pioneering == false
 
     toCheckPoint()
     eventPlayer.is_invincible = false
@@ -311,11 +294,14 @@ rule "Arrive":
     
     eventPlayer.check_point+=1
     abilityReset()
-    if eventPlayer.check_point == len(CheckPoint)-1 and (eventPlayer != Pioneer and not Pioneer.is_pioneering or getNumberOfPlayers(Team.ALL) == 1) and GameMode == false: # (and GameMode == false) 임시임
-        Pioneer = eventPlayer
-        eventPlayer.is_pioneering = true
-        eventPlayer.setAbility1Enabled(true)
-        eventPlayer.setUltEnabled(true)
+    if eventPlayer.check_point == len(CheckPoint)-1 and GameMode == false: # (and GameMode == false) 임시임
+        if (eventPlayer != Pioneer and not Pioneer.is_pioneering) or getNumberOfPlayers(Team.ALL) == 1:
+            Pioneer = eventPlayer
+            eventPlayer.is_pioneering = true
+            eventPlayer.setAbility1Enabled(true)
+            eventPlayer.setUltEnabled(true)
+        else:
+            eventPlayer.is_last_check_point = true
     if eventPlayer.check_point > eventPlayer.arrived_check_point:
         eventPlayer.arrived_check_point = eventPlayer.check_point
         CheckPointList[eventPlayer.player_index] = eventPlayer.arrived_check_point
