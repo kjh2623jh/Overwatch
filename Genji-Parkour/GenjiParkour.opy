@@ -10,7 +10,7 @@ settings {
         "enableMatchVoiceChat": true,
         "returnToLobby": "never",
         "allowPlayersInQueue": true,
-        "team1Slots": 12,
+        "team1Slots": 11,
         "team2Slots": 0,
         "spectatorSlots": 3
     },
@@ -93,11 +93,16 @@ playervar name
 playervar player_index
 playervar save_temp
 playervar is_last_check_point
+playervar dva_position_arr
+playervar dva_position
+playervar dva_index
 
 subroutine save 
 subroutine toCheckPoint 
 subroutine abilityReset
+subroutine invincibleMode
 
+#!extension buffStatusEffects
 
 
 def save():
@@ -123,9 +128,8 @@ rule "Init":
     disableGamemodeCompletion()
     disableAnnouncer()
     disableMusic()
-
     PioneerHud = []
-    CheckPointSize = createWorkshopSetting(float[0.1:3], "Setting", "CheckPoint Size", 1.5, 0)
+    CheckPointSize = createWorkshopSetting(float[0.1:3], "Setting", "개척지 크기", 1.5, 0)
     waitUntil(hostPlayer.hasSpawned(),5)
     Pioneer = hostPlayer
     if not hostPlayer.hasSpawned():
@@ -145,19 +149,22 @@ rule "Init":
         PioneerHud.append(getLastCreatedText())
         hudHeader(getAllPlayers(), "{0}님 시작할 장소로 가 {1}를 누르세요.".format(Pioneer, buttonString(Button.RELOAD)), HudPosition.TOP, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         PioneerHud.append(getLastCreatedText())
-        hudHeader(Pioneer if Pioneer.is_pioneering else null, "개척해주세요", HudPosition.TOP, -1, Color.PURPLE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
-        hudHeader(getAllPlayers() if Pioneer.is_pioneering else null, "개척자: {0}".format(Pioneer), HudPosition.TOP, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+        hudHeader(Pioneer if Pioneer.is_pioneering else null, "개척해주세요", HudPosition.TOP, -1.1, Color.PURPLE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+        hudHeader(getAllPlayers() if Pioneer.is_pioneering else null, "개척자: {0}".format(Pioneer), HudPosition.TOP, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         createEffect(Pioneer if PioneerCancelTimer else null, Effect.RING, Color.RED, PioneerPosition, CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
-        hudHeader(Pioneer if PioneerCancelTimer else null, "Cancel: {0} | Confirm: {1} {2}".format(buttonString(Button.PRIMARY_FIRE), buttonString(Button.SECONDARY_FIRE), ceil(PioneerCancelTimer)), HudPosition.TOP, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext(getAllPlayers(), "{0}/270m".format(floor(getTotalTimeElapsed()/60)), HudPosition.LEFT, 0, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+        hudHeader(Pioneer if PioneerCancelTimer else null, "Cancel: {0} | Confirm: {1} {2}".format(buttonString(Button.PRIMARY_FIRE), buttonString(Button.SECONDARY_FIRE), ceil(PioneerCancelTimer)), HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.NEVER)
+    hudSubheader(getAllPlayers(), "v 0.1", HudPosition.LEFT, -1, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    hudSubtext(getAllPlayers(), "server reset. {0}m left".format(270 - floor(getTotalTimeElapsed()/60)), HudPosition.LEFT, 0, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     chase(PioneerCancelTimer, 0, rate=1, ChaseReeval.NONE)
 
 
+/*
 rule "Switch Pioneer Modes":
     @Condition CheckPoint == false
     @Condition Pioneer.isHoldingButton(Button.INTERACT)
 
     GameMode = not GameMode
+*/
 
 
 rule "Player Joined":
@@ -167,6 +174,7 @@ rule "Player Joined":
     eventPlayer.enableDeathSpectateTargetHud()
     eventPlayer.setAbility2Enabled(false)
     eventPlayer.disablePlayerCollision()
+    eventPlayer.disableGamemodeHud() # 임시
     eventPlayer.name = "{0}".format(eventPlayer)
     if eventPlayer.name in PlayerList:
         eventPlayer.player_index = PlayerList.index(eventPlayer.name)
@@ -177,13 +185,17 @@ rule "Player Joined":
         PlayerList.append(eventPlayer.name)
         CheckPointList.append(eventPlayer.check_point)
     if CheckPoint == false:
-        eventPlayer.is_invincible = true
-    createEffect(eventPlayer, Effect.RING, Color.BLUE, CheckPoint[eventPlayer.check_point], CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
-    createEffect([player for player in eventPlayer if CheckPoint[eventPlayer.check_point+1]], Effect.RING, Color.PURPLE, CheckPoint[eventPlayer.check_point+1], CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
-    createInWorldText(eventPlayer if CheckPoint[eventPlayer.check_point + 1] else null, "다음 개척지\n개척자: {0}".format(PioneerArr[eventPlayer.check_point+1]), CheckPoint[eventPlayer.check_point+1], 1.5, Clip.NONE, WorldTextReeval.VISIBILITY_POSITION_AND_STRING, Color.PURPLE, SpecVisibility.DEFAULT)
+        if eventPlayer.is_pioneering == false:
+            eventPlayer.is_last_check_point = true
+        invincibleMode()
+    createEffect(eventPlayer, Effect.RING, Color.WHITE, CheckPoint[eventPlayer.check_point], CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
+    createEffect([player for player in eventPlayer if CheckPoint[eventPlayer.check_point+1]], Effect.RING, Color.GREEN, CheckPoint[eventPlayer.check_point+1], CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
+    createEffect(eventPlayer if eventPlayer.is_invincible else null, Effect.ANA_NANO_BOOSTED, Color.GREEN, eventPlayer, 1, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
+    createInWorldText(eventPlayer if CheckPoint[eventPlayer.check_point + 1] else null, "다음 개척지\n개척자: {0}".format(PioneerArr[eventPlayer.check_point+1]), CheckPoint[eventPlayer.check_point+1], 1.5, Clip.NONE, WorldTextReeval.VISIBILITY_POSITION_AND_STRING, Color.GREEN, SpecVisibility.DEFAULT)
     hudHeader(eventPlayer, "{0}/{1}\n{2}".format(eventPlayer.check_point, len(CheckPoint)-1, "{0} {1} | {2}".format(abilityIconString(Hero.GENJI, Button.ABILITY_1), abs(AbilityArr[eventPlayer.check_point+1]-eventPlayer.ability), "{0} {1}".format(abilityIconString(Hero.GENJI, Button.ULTIMATE), abs(UltimateArr[eventPlayer.check_point+1]-eventPlayer.ultimate)))), HudPosition.RIGHT, -1, Color.BLUE, HudReeval.STRING, SpecVisibility.DEFAULT)
+    hudHeader(eventPlayer if eventPlayer.is_invincible else null, "연습모드", HudPosition.LEFT, 0, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), "{0} {1}".format(eventPlayer, eventPlayer.arrived_check_point), HudPosition.RIGHT, (sorted(getAllPlayers(), lambda player: -1 * player.arrived_check_point)).index(eventPlayer), Color.WHITE, HudReeval.VISIBILITY_SORT_ORDER_AND_STRING, SpecVisibility.DEFAULT)
-    createIcon(eventPlayer if CheckPoint[eventPlayer.check_point+1] and not eventPlayer.isInViewAngle(CheckPoint[eventPlayer.check_point+1], 60) else null, CheckPoint[eventPlayer.check_point+1], Icon.FLAG, IconReeval.VISIBILITY_AND_POSITION, Color.PURPLE, true)
+    createIcon(eventPlayer if CheckPoint[eventPlayer.check_point+1] and not eventPlayer.isInViewAngle(CheckPoint[eventPlayer.check_point+1], 60) else null, CheckPoint[eventPlayer.check_point+1], Icon.FLAG, IconReeval.VISIBILITY_AND_POSITION, Color.GREEN, true)
 
 
 rule "Create First Checkpoint":
@@ -207,6 +219,7 @@ rule "Create First Checkpoint":
 def toCheckPoint():
     @Name "ToCheckpoint"
 
+    waitUntil(not eventPlayer.isUsingAbility1(), 3)
     eventPlayer.startForcingPosition(CheckPoint[eventPlayer.check_point], false)
     abilityReset()
     wait(0.1)
@@ -222,11 +235,28 @@ def abilityReset():
     eventPlayer.ultimate = 0
     eventPlayer.setAbility1Enabled(true)
     eventPlayer.setUltEnabled(true)
+    eventPlayer.setUltCharge(100)
     if CheckPoint[eventPlayer.check_point+1] and eventPlayer.is_pioneering == false and eventPlayer.is_invincible == false:
         if AbilityArr[eventPlayer.check_point+1]==0:
             eventPlayer.setAbility1Enabled(false)
         if UltimateArr[eventPlayer.check_point+1]==0:
             eventPlayer.setUltEnabled(false)
+
+        
+def invincibleMode():
+    @Name "InvincibleMode"
+
+    if eventPlayer.is_invincible:
+        eventPlayer.is_float = true
+        eventPlayer.is_invincible = false
+        toCheckPoint()
+        eventPlayer.is_float = false
+    else:
+        eventPlayer.is_invincible = true
+        eventPlayer.setAbility1Enabled(true)
+        eventPlayer.setUltEnabled(true)
+        eventPlayer.setAbilityCooldown(Button.ABILITY_1, 0)
+        smallMessage(eventPlayer, "invincible mode")
 
 
 rule "Die":
@@ -245,14 +275,18 @@ rule "Pioneer":
     @Condition eventPlayer == Pioneer
     @Condition eventPlayer.is_pioneering == true
     @Condition eventPlayer.is_invincible == false
+    @Condition eventPlayer.is_float == false
     @Condition eventPlayer.isOnGround()
     @Condition distance(eventPlayer, CheckPoint[eventPlayer.check_point]) > PioneerMinDistans
 
-    eventPlayer.is_invincible = true
-    eventPlayer.setAbilityCooldown(Button.ABILITY_1, 0)
+    eventPlayer.is_float = true
     PioneerPosition = eventPlayer.getPosition()
     PioneerCancelTimer = PioneerCancelTime
+    invincibleMode()
+    eventPlayer.setAbilityCooldown(Button.ABILITY_1, 0)
     waitUntil(eventPlayer.isHoldingButton(Button.PRIMARY_FIRE) or eventPlayer.isHoldingButton(Button.SECONDARY_FIRE), PioneerCancelTime)
+    eventPlayer.is_invincible = false
+    PioneerCancelTimer = 0
     if eventPlayer.isHoldingButton(Button.PRIMARY_FIRE):
         toCheckPoint()
     else:
@@ -260,16 +294,14 @@ rule "Pioneer":
         PioneerArr.append(eventPlayer.name)
         AbilityArr.append(eventPlayer.ability)
         UltimateArr.append(eventPlayer.ultimate)
-        eventPlayer.is_float = true
         if getNumberOfPlayers(Team.ALL) > 1 or eventPlayer.isHoldingButton(Button.INTERACT):
             eventPlayer.is_pioneering = false
         else:
             eventPlayer.check_point += 1
             eventPlayer.arrived_check_point += 1
         toCheckPoint()
-        eventPlayer.is_float = false
-    PioneerCancelTimer = 0
-    eventPlayer.is_invincible = false
+    eventPlayer.is_float = false
+    
 
 
 rule "Pioneered":
@@ -279,7 +311,9 @@ rule "Pioneered":
     @Condition eventPlayer != Pioneer
 
     toCheckPoint()
-    eventPlayer.is_invincible = false
+    eventPlayer.is_last_check_point = false
+    if eventPlayer.is_invincible:
+        invincibleMode()
     smallMessage(eventPlayer, "pioneered")
     
     
@@ -293,15 +327,14 @@ rule "Arrive":
     @Condition distance(eventPlayer, CheckPoint[eventPlayer.check_point + 1]) < CheckPointSize
     
     eventPlayer.check_point+=1
-    abilityReset()
-    if eventPlayer.check_point == len(CheckPoint)-1 and GameMode == false: # (and GameMode == false) 임시임
+    if eventPlayer.check_point == len(CheckPoint)-1 and GameMode == false: # (and GameMode == false) 임시
         if (eventPlayer != Pioneer and not Pioneer.is_pioneering) or getNumberOfPlayers(Team.ALL) == 1:
             Pioneer = eventPlayer
             eventPlayer.is_pioneering = true
-            eventPlayer.setAbility1Enabled(true)
-            eventPlayer.setUltEnabled(true)
         else:
             eventPlayer.is_last_check_point = true
+            invincibleMode()
+    abilityReset()
     if eventPlayer.check_point > eventPlayer.arrived_check_point:
         eventPlayer.arrived_check_point = eventPlayer.check_point
         CheckPointList[eventPlayer.player_index] = eventPlayer.arrived_check_point
@@ -311,8 +344,9 @@ rule "Finish": # if this workshop is finished map
     @Event eachPlayer
     @Condition eventPlayer.arrived_check_point == len(CheckPoint)-1
     # @Condition Finished
-    @Condition GameMode # 임시임
+    @Condition GameMode # 임시
 
+    invincibleMode()
     bigMessage(eventPlayer, "Clear!!")
 
 
@@ -335,8 +369,12 @@ rule "Reset":
     @Condition eventPlayer.isHoldingButton(Button.RELOAD)
     @Condition CheckPoint
 
-    waitUntil(not eventPlayer.isUsingAbility1(), 3)
-    toCheckPoint()
+    if eventPlayer.is_pioneering and PioneerCancelTimer:
+        eventPlayer.startForcingPosition(PioneerPosition, false)
+        wait(0.1)
+        eventPlayer.stopForcingPosition()
+    else:
+        toCheckPoint()
 
 
 rule "Abiliy 1":
@@ -392,15 +430,7 @@ rule "Invincible Mode":
     @Condition eventPlayer.isHoldingButton(Button.MELEE)
     @Condition CheckPoint
 
-    if eventPlayer.is_invincible:
-        eventPlayer.is_invincible = false
-        toCheckPoint()
-    else:
-        eventPlayer.is_invincible = true
-        eventPlayer.setAbility1Enabled(true)
-        eventPlayer.setUltEnabled(true)
-        eventPlayer.setAbilityCooldown(Button.ABILITY_1, 0)
-        smallMessage(eventPlayer, "invincible mode")
+    invincibleMode()
 
 
 rule "Invincible Mode Skill":
@@ -422,10 +452,11 @@ rule "Ultimate Charge":
 rule "Spectate":
     @Event eachPlayer
     @Condition eventPlayer.isHoldingButton(Button.INTERACT)
-    @Condition eventPlayer.arrived_check_point < len(CheckPoint)-1 or Pioneer.is_pioneering == false
 
     wait(1, Wait.ABORT_WHEN_FALSE)
     if eventPlayer.isAlive():
+        if eventPlayer.is_last_check_point and Pioneer.is_pioneering:
+            return
         eventPlayer.disableRespawn()
         eventPlayer.is_float = true
         kill(eventPlayer, null)
@@ -451,17 +482,33 @@ rule "Dva":
     @Condition getNumberOfPlayers(Team.1) < 12
 
     wait(2)
-    createDummy(Hero.DVA, Team.1, -1, vect(0, 0, 0), vect(0, 0, 0))
+    createDummy(Hero.DVA, Team.1, -1, vect(0, 10, 0), vect(0, 0, 0))
     Dva = getLastCreatedEntity()
+    Dva.dva_position_arr = [[0, Map.NEPAL, Map.NUMBANI, Map.DORADO, Map.LIJIANG_TOWER, Map.LIJIANG_TOWER_LNY, Map.BUSAN, Map.BLIZZ_WORLD, Map.BLIZZ_WORLD_WINTER, Map.OASIS, Map.ILIOS, Map.PARIS], [vect(-50, 15, 0), vect(-195, -90, 0)], [vect(100, -1, 25)], [vect(90, 10, -1)], [vect(0, 270, 280), vect(0, 95, 150), vect(0, 0, -35)], [vect(0, 270, 280), vect(0, 95, 150), vect(0, 0, -35)], [vect(50, 15, -115), vect(-330, 15, 140), vect(215, 15, 225)], [vect(-45, 5, 95)], [vect(-45, 5, 95)], [vect(-190, 15, 0), vect(135, 10, -240), vect(145, 10, 250)], [vect(30, 60, -155), vect(-200, 1, 10), vect(320, -20, -35)] ,[vect(-45, 15, -10)]]
+    Dva.dva_index = Dva.dva_position_arr[0].index(getCurrentMap())
     wait(1)
     Dva.setInvisibility(Invis.ALL)
-    Dva.startForcingPosition(vect(0, 0, 0), true)
-    Dva.setUltEnabled(true)
-    Dva.setUltCharge(100)
-    Dva.disableEnvironmentCollision(true)
-    Dva.startScalingSize(100, true)
-    Dva.forceButtonPress(Button.ULTIMATE)
-    wait(3)
+    smallMessage(hostPlayer, Dva.dva_index)
+    if Dva.dva_index+1:
+        for Dva.dva_position in range(len(Dva.dva_position_arr[Dva.dva_index])):
+            Dva.startForcingPosition(Dva.dva_position_arr[Dva.dva_index][Dva.dva_position], true)
+            smallMessage(hostPlayer, Dva.dva_position_arr[Dva.dva_index][Dva.dva_position])
+            Dva.setUltEnabled(true)
+            Dva.setUltCharge(100)
+            Dva.disableEnvironmentCollision(true)
+            Dva.startScalingSize(100, true)
+            Dva.forceButtonPress(Button.ULTIMATE)
+            wait(3)
+            Dva.respawn()
+            wait(1)
+    else:
+        Dva.startForcingPosition(vect(0, 0, 0), true)
+        Dva.setUltEnabled(true)
+        Dva.setUltCharge(100)
+        Dva.disableEnvironmentCollision(true)
+        Dva.startScalingSize(100, true)
+        Dva.forceButtonPress(Button.ULTIMATE)
+        wait(3)
     destroyAllDummies()
 
 
