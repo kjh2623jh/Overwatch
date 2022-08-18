@@ -79,7 +79,7 @@ globalvar PioneerCancelTime
 globalvar PioneerCancelTimer
 globalvar PioneerCancel
 globalvar PioneerPosition
-# globalvar Finished
+globalvar Finished
 
 playervar check_point 
 playervar arrived_check_point
@@ -96,6 +96,7 @@ playervar is_last_check_point
 playervar dva_position_arr
 playervar dva_position
 playervar dva_index
+playervar is_invisible
 
 subroutine save 
 subroutine toCheckPoint 
@@ -110,7 +111,7 @@ def save():
 
     smallMessage(hostPlayer, "Delete it")
     /*
-    GameMode = "제작: <name>"
+    GameMode = "제작: <player>"
     CheckPoint = [vect(0.235, 6.949, -54.319), vect(-4.961, 6.96, -70.946), vect(-15.015, 6.947, -53.262), ...]
     PioneerArr = ["name", "name", "name", ...]
     AbilityArr = [0, 1, 2, 1, 1, 2, 0, 0, 1, 0, ...]
@@ -139,10 +140,9 @@ rule "Init":
     PlayerList = []
     CheckPointList = []
     save()
-    # 시간제한은 없고 기술제한은 기본적으로 존재 ( 완성된 맵에서는 시간 있음 )
     if CheckPoint:
-        hudHeader(getAllPlayers(), GameMode, HudPosition.TOP, -2, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
-        # Finished = true
+        hudHeader(getAllPlayers(), "제작: {0}".format(GameMode), HudPosition.TOP, -2, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT) # 임시
+        Finished = true
     else:
         hudHeader(getAllPlayers(), "{0}".format(["개척 모드", "제작 모드"][GameMode]), HudPosition.TOP, -2, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         hudHeader(Pioneer, "press {0}: 모드 변경".format(buttonString(Button.INTERACT)), HudPosition.TOP, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
@@ -154,6 +154,7 @@ rule "Init":
         createEffect(Pioneer if PioneerCancelTimer else null, Effect.RING, Color.RED, PioneerPosition, CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
         hudHeader(Pioneer if PioneerCancelTimer else null, "Cancel: {0} | Confirm: {1} {2}".format(buttonString(Button.PRIMARY_FIRE), buttonString(Button.SECONDARY_FIRE), ceil(PioneerCancelTimer)), HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.NEVER)
     hudSubheader(getAllPlayers(), "v 0.1", HudPosition.LEFT, -1, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    hudSubtext(getAllPlayers(), "<discord server promote>", HudPosition.LEFT, 0, Color.GREEN, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), "server reset. {0}m left".format(270 - floor(getTotalTimeElapsed()/60)), HudPosition.LEFT, 0, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     chase(PioneerCancelTimer, 0, rate=1, ChaseReeval.NONE)
 
@@ -296,6 +297,7 @@ rule "Pioneer":
         UltimateArr.append(eventPlayer.ultimate)
         if getNumberOfPlayers(Team.ALL) > 1 or eventPlayer.isHoldingButton(Button.INTERACT):
             eventPlayer.is_pioneering = false
+            eventPlayer.setInvisibility(Invis.NONE)
         else:
             eventPlayer.check_point += 1
             eventPlayer.arrived_check_point += 1
@@ -328,10 +330,11 @@ rule "Arrive":
     @Condition distance(eventPlayer, CheckPoint[eventPlayer.check_point + 1]) < CheckPointSize
     
     eventPlayer.check_point+=1
-    if eventPlayer.check_point == len(CheckPoint)-1 and GameMode == false: # (and GameMode == false) 임시
+    if eventPlayer.check_point == len(CheckPoint)-1 and Finished == false:
         if (eventPlayer != Pioneer and not Pioneer.is_pioneering) or getNumberOfPlayers(Team.ALL) == 1:
             Pioneer = eventPlayer
             eventPlayer.is_pioneering = true
+            eventPlayer.setInvisibility(Invis.ALL)
         else:
             eventPlayer.is_last_check_point = true
             invincibleMode()
@@ -344,8 +347,7 @@ rule "Arrive":
 rule "Finish": # if this workshop is finished map
     @Event eachPlayer
     @Condition eventPlayer.arrived_check_point == len(CheckPoint)-1
-    # @Condition Finished
-    @Condition GameMode # 임시
+    @Condition Finished
 
     invincibleMode()
     bigMessage(eventPlayer, "Clear!!")
@@ -468,6 +470,20 @@ rule "Spectate":
         eventPlayer.is_float = false
 
 
+rule "Invisible Mode":
+    @Event eachPlayer
+    @Condition eventPlayer.isHoldingButton(Button.ABILITY_1)
+    @Condition eventPlayer.isHoldingButton(Button.INTERACT)
+    @Condition eventPlayer.isHoldingButton(Button.JUMP)
+    @Condition eventPlayer.is_pioneering == false
+
+    eventPlayer.is_invisible = not eventPlayer.is_invisible
+    if eventPlayer.is_invisible:
+        eventPlayer.setInvisibility(Invis.ALL)
+    else:
+        eventPlayer.setInvisibility(Invis.NONE)
+
+
 rule "Revive":
     @Event playerDied
     @Condition eventPlayer.is_float == false
@@ -518,14 +534,16 @@ rule "Save Inspector":
     @Condition hostPlayer.isHoldingButton(Button.RELOAD)
     @Condition hostPlayer.isStanding()
 
-    GameMode = "제작: {0}".format(hostPlayer) # GameMode 는 건들면 안될지도? inspector 저장 하면 개척모드이거나 제작모드로 들어가있던 hud가 0으로 변해버림
     hostPlayer.save_temp = []
+    hostPlayer.save_temp.append(GameMode)
     hostPlayer.save_temp.append(PlayerList)
     hostPlayer.save_temp.append(CheckPointList)
+    GameMode = "제작: {0}".format(hostPlayer)
     PlayerList = []
     CheckPointList = []
     enableInspector()
     disableInspector()
-    PlayerList = hostPlayer.save_temp[0]
-    CheckPointList = hostPlayer.save_temp[1]
+    GameMode = hostPlayer.save_temp[0]
+    PlayerList = hostPlayer.save_temp[1]
+    CheckPointList = hostPlayer.save_temp[2]
     hostPlayer.save_temp = []
