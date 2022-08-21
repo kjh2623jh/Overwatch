@@ -505,17 +505,15 @@ rule "Dva":
     Dva.dva_index = Dva.dva_position_arr[0].index(getCurrentMap())
     wait(1)
     Dva.setInvisibility(Invis.ALL)
-    smallMessage(hostPlayer, Dva.dva_index)
     if Dva.dva_index+1:
         for Dva.dva_position in range(len(Dva.dva_position_arr[Dva.dva_index])):
             Dva.startForcingPosition(Dva.dva_position_arr[Dva.dva_index][Dva.dva_position], true)
-            smallMessage(hostPlayer, Dva.dva_position_arr[Dva.dva_index][Dva.dva_position])
             Dva.setUltEnabled(true)
             Dva.setUltCharge(100)
             Dva.disableEnvironmentCollision(true)
             Dva.startScalingSize(100, true)
             Dva.forceButtonPress(Button.ULTIMATE)
-            wait(3)
+            wait(4)
             Dva.respawn()
             wait(1)
     else:
