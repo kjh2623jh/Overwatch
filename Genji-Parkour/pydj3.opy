@@ -1,7 +1,7 @@
 settings {
     "main": {
         "modeName": "겐지 개척 파쿠르",
-        "description": "modified by 훈제김치\ncode : PYDJ3\nhttps://discord.gg/dyGvBbBgxV\n22.4.13"
+        "description": "modified by 훈제김치\ncode : PYDJ3\nhttps://discord.gg/dyGvBbBgxV\n22.8.23"
     },
     "lobby": {
         "enableMatchVoiceChat": true,
@@ -91,17 +91,14 @@ globalvar nextCpRingColor 52
 globalvar ColorList 53
 globalvar auto_invisible 54
 globalvar bannedSkills 55
-globalvar BreakFences 56
 globalvar nextCpLightShaftColor 57
 globalvar MapCode 58
-globalvar dvacnt 59
+globalvar Dva 60
 globalvar timerSetting 68
 globalvar next2CpTextColor 69
-globalvar dvaposSaver 70
 globalvar playerList 71
 globalvar playerLevel 72
 globalvar playerTime 73
-globalvar MapName 75
 
 
 #Player variables
@@ -121,6 +118,9 @@ playervar check 37
 playervar playerleveltemp 38
 playervar playertimetemp 39
 playervar Dvapostemp 40
+playervar dva_position 41
+playervar dva_position_arr 42
+playervar dva_index 43
 playervar bhopColor 85
 
 
@@ -130,7 +130,6 @@ subroutine init 0
 subroutine memory 1
 subroutine serverloadbuffer 2
 subroutine serverloadbuffer2 3
-subroutine DvaPos 6
 subroutine genjiparkour 7
 
 
@@ -265,7 +264,7 @@ def serverloadbuffer():
 def serverloadbuffer2():
     @Name "서버부하방지용2"
     
-    hudSubtext(localPlayer, "{0}{1}".format("{0}+{1}: {2}\n".format(buttonString(Button.INTERACT), buttonString(Button.MELEE), text[5]) if invincible else null, "{0}{1}{2}".format("{0}{1}{2}".format("{0}+{1}, {2}: ".format(buttonString(Button.INTERACT), buttonString(Button.JUMP), buttonString(Button.CROUCH)), "{0}{1}: {2}".format(Y[0], buttonString(Button.ULTIMATE), Y[41]), "{0}: {1}/{2}".format(Y[38], Y[39], Y[40])), "{0}{1}{2}".format("{0}: {1}".format(buttonString(Button.RELOAD), Y[1]) if localPlayer != E and localPlayer != M and A and AF and (localPlayer.B != len(A) - 1 or (not (not E or M))) else AO, "{0}: {1}".format(buttonString(Button.PRIMARY_FIRE), Y[32]) if localPlayer != M and localPlayer.isOnGround() and A[localPlayer.A + 1] else AO, "{0}+{1}: {2}".format(buttonString(Button.CROUCH), buttonString(Button.ULTIMATE), Y[6]) if X else AO), "{0}+{1}: {2}".format(buttonString(Button.INTERACT), buttonString(Button.ULTIMATE), Y[44]) if localPlayer == hostPlayer and AA and not E else AO)), HudPosition.RIGHT, -1, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubtext(localPlayer, "{0}{1}".format("{0}+{1}: {2}\n".format(buttonString(Button.INTERACT), buttonString(Button.MELEE), text[5]) if invincible else "", "{0}{1}{2}".format("{0}{1}{2}".format("{0}+{1}, {2}: ".format(buttonString(Button.INTERACT), buttonString(Button.JUMP), buttonString(Button.CROUCH)), "{0}{1}: {2}".format(Y[0], buttonString(Button.ULTIMATE), Y[41]), "{0}: {1}/{2}".format(Y[38], Y[39], Y[40])), "{0}{1}{2}".format("{0}: {1}".format(buttonString(Button.RELOAD), Y[1]) if localPlayer != E and localPlayer != M and A and AF and (localPlayer.B != len(A) - 1 or (not (not E or M))) else AO, "{0}: {1}".format(buttonString(Button.PRIMARY_FIRE), Y[32]) if localPlayer != M and localPlayer.isOnGround() and A[localPlayer.A + 1] else AO, "{0}+{1}: {2}".format(buttonString(Button.CROUCH), buttonString(Button.ULTIMATE), Y[6]) if X else AO), "{0}+{1}: {2}".format(buttonString(Button.INTERACT), buttonString(Button.ULTIMATE), Y[44]) if localPlayer == hostPlayer and AA and not E else AO)), HudPosition.RIGHT, -1, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     if "{0}".format(Hero.GENJI) == "겐지":
         hudHeader([i for i in localPlayer if A], "{0}{1}{2}".format("현재 단계: {0}/{1}{2}".format(localPlayer.A + 1, len(A), (" {0}".format(getTotalTimeElapsed() - localPlayer.L) if timerSetting else " {0}:{1}".format(floor((getTotalTimeElapsed() - localPlayer.L) / 60), floor((getTotalTimeElapsed() - localPlayer.L) % 60))) if X and not localPlayer.K else AO), AO if not T else "\r\n {0}".format("{0}{1}".format(abilityIconString(localPlayer.getCurrentHero(), Button.ABILITY_1), C.last() if localPlayer == E else localPlayer.G)), AO if not S else "\r\n제한시간: {0}초".format(R[localPlayer.A] if localPlayer.isOnGround() else getTotalTimeElapsed() + 1 - localPlayer.I if localPlayer == E else 0 if localPlayer.A == len(A) - 1 else R[localPlayer.A] - (getTotalTimeElapsed() - localPlayer.I))), HudPosition.RIGHT, -3, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     elif "{0}".format(Hero.GENJI) == "源氏":
@@ -1197,7 +1196,7 @@ def genjiparkour():
     
     #↓맵 코드를 적어주세요↓
     MapCode = ""
-    hudSubheader(localPlayer, "수정일 : 4.13", HudPosition.LEFT, -99, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    hudSubheader(localPlayer, "8.23", HudPosition.LEFT, -99, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
     if MapCode == "":
         goto lbl_0
     hudSubtext(localPlayer, "맵 코드 : {0}".format(MapCode), HudPosition.LEFT, -14, Color.AQUA, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
@@ -1238,7 +1237,6 @@ def genjiparkour():
     ColorList = [Color.WHITE, Color.YELLOW, Color.GREEN, Color.PURPLE, Color.RED, Color.BLUE, Color.AQUA, Color.ORANGE, Color.SKY_BLUE, Color.TURQUOISE, Color.LIME_GREEN, Color.BLACK, Color.ROSE, Color.VIOLET, Color.GRAY]
     forcingqreset = createWorkshopSetting(bool, "파쿠르 설정(Parkour Setting)", "도착 시 강제로 재위치(forcing quick reset when you reach cp)", true, 1)
     invincible = createWorkshopSetting(bool, "파쿠르 설정(Parkour Setting)", "연습모드(Invincible mode)", true, 0)
-    BreakFences = createWorkshopSetting(bool, "파쿠르 설정(Parkour Setting)", "울타리 부수기(break fences)", true, 8)
     auto_invisible = createWorkshopSetting(bool, "파쿠르 설정(Parkour Setting)", "자동 투명화(Auto Invisible)", true, 9)
     currentCpColor = createWorkshopSetting(enum["white", "yellow", "green", "pruple", "red", "blue", "auqa", "orange", "sky blue", "turquoise", "lime green", "black", "rose", "violet", "gray"], "파쿠르 설정(Parkour Setting)", "현재 개척지 색(current checkpoint color)", 5, 10)
     nextCpRingColor = createWorkshopSetting(enum["white", "yellow", "green", "pruple", "red", "blue", "auqa", "orange", "sky blue", "turquoise", "lime green", "black", "rose", "violet", "gray"], "파쿠르 설정(Parkour Setting)", "다음 개척지 색(next checkpoint ring color)", 3, 11)
@@ -1250,12 +1248,6 @@ def genjiparkour():
     climb = createWorkshopSetting(bool, "UI 설정(UI setting)", "벽타기 표시(climb box)", true, 1)
     climbtext = createWorkshopSetting(bool, "UI 설정(UI setting)", "벽타기 텍스트(climb small message)", true, 3)
     createbhoptext = createWorkshopSetting(bool, "UI 설정(UI setting)", "앉콩 텍스트(addbhop small message)", true, 5)
-    if BreakFences:
-        if A and not AA:
-            goto lbl_2
-        DvaPos()
-        lbl_2:
-        dvacnt = 1
 
 
 rule "연습모드":
@@ -1522,75 +1514,39 @@ rule "금지 | 벽캔":
     smallMessage(eventPlayer, text[9])
 
 
-rule "디바 생성, 폭파":
-    @Condition dvacnt == 1
-    @Condition len(getPlayers(Team.1)) < 12
-    
-    wait(3)
-    if DvaPos == 0:
-        smallMessage(hostPlayer, "현재 이 맵은 울타리 부수기 설정이 되어있지 않습니다.")
-    else:
-        dvacnt = 0
-        while dvacnt < len(DvaPos):
-            while getNumberOfPlayers(Team.1) < 11 and dvacnt < len(DvaPos):
-                createDummy(Hero.DVA, Team.1, -1, DvaPos[dvacnt], Vector.UP)
-                dvacnt += 1
+rule "Dva":
+    @Condition getNumberOfPlayers(Team.1) < 12
+
+    wait(2)
+    createDummy(Hero.DVA, Team.1, -1, vect(0, 10, 0), vect(0, 0, 0))
+    Dva = getLastCreatedEntity()
+    Dva.dva_position_arr = [[0, Map.NEPAL, Map.NUMBANI, Map.DORADO, Map.LIJIANG_TOWER, Map.LIJIANG_TOWER_LNY, Map.BUSAN, Map.BLIZZ_WORLD, Map.BLIZZ_WORLD_WINTER, Map.OASIS, Map.ILIOS, Map.PARIS], [vect(-50, 15, 0), vect(-195, -90, 0)], [vect(100, -1, 25)], [vect(90, 10, -1)], [vect(0, 270, 280), vect(0, 95, 150), vect(0, 0, -35)], [vect(0, 270, 280), vect(0, 95, 150), vect(0, 0, -35)], [vect(50, 15, -115), vect(-330, 15, 140), vect(215, 15, 225)], [vect(-45, 5, 95)], [vect(-45, 5, 95)], [vect(-190, 15, 0), vect(135, 10, -240), vect(145, 10, 250)], [vect(30, 60, -155), vect(-200, 1, 10), vect(320, -20, -35)] ,[vect(-45, 15, -10)]]
+    Dva.dva_index = Dva.dva_position_arr[0].index(getCurrentMap())
+    wait(1)
+    Dva.setInvisibility(Invis.ALL)
+    if Dva.dva_index+1:
+        for Dva.dva_position in range(len(Dva.dva_position_arr[Dva.dva_index])):
+            Dva.startForcingPosition(Dva.dva_position_arr[Dva.dva_index][Dva.dva_position], true)
+            Dva.setUltEnabled(true)
+            Dva.setUltCharge(100)
+            Dva.disableEnvironmentCollision(true)
+            Dva.startScalingSize(100, true)
+            Dva.forceButtonPress(Button.ULTIMATE)
+            wait(4)
+            Dva.respawn()
             wait(1)
-            getPlayersOnHero(Hero.DVA, Team.1).setUltEnabled(true)
-            getPlayersOnHero(Hero.DVA, Team.1).setUltCharge(100)
-            wait(0.25)
-            getPlayersOnHero(Hero.DVA, Team.1).startForcingButton(Button.ULTIMATE)
-            wait(3)
-            destroyAllDummies()
-        dvacnt = -1
+    else:
+        Dva.startForcingPosition(vect(0, 0, 0), true)
+        Dva.setUltEnabled(true)
+        Dva.setUltCharge(100)
+        Dva.disableEnvironmentCollision(true)
+        Dva.startScalingSize(100, true)
+        Dva.forceButtonPress(Button.ULTIMATE)
+        wait(3)
+    Dva.dva_position_arr = []
+    destroyAllDummies()
 
-
-def DvaPos():
-    @Name "디바 자폭 위치"
     
-    #"리장 타워, 부산, 일리오스는 일단 보류 나머지 맵들부터 채워넣기"
-    disableInspector()
-    MapName = "{0}".format(getCurrentMap())
-    if MapName == "리알토":
-        DvaPos = [vect(0.235, 6.949, -54.319), vect(-4.961, 6.96, -70.946), vect(-15.015, 6.947, -53.262), vect(-14.369, 0.046, -67.571), vect(52.32, 5.95, -33.687), vect(62.242, 5.95, -39.633), vect(66.693, 5.95, -25.967), vect(78.625, 4.958, -13.893), vect(78.368, 4.95, -25.307), vect(84.183, 4.95, -32.765), vect(91.16, 0.935, -25.304), vect(90.277, 0.935, -16.372), vect(103.726, 6.95, -33.435), vect(112.225, 6.95, -11.564), vect(99.743, 0.95, -47.35), vect(38.01, 6.95, -68.46), vect(38.479, 6.95, -82.038), vect(48.911, 6.95, -87.966), vect(-2.172, 6.95, -42.113), vect(3.426, 4.95, -33.054), vect(-44.746, 3.939, -89.839), vect(-63.559, 3.95, -137.299), vect(-49.755, 3.95, -137.464), vect(-28.269, 5.95, -82.012), vect(-20.06, 2.634, -84.364), vect(40.302, 6.95, -47.652), vect(59.303, 6.95, -19.675)]
-    elif MapName == "도라도":
-        DvaPos = [vect(113.039, 18, 0.411), vect(106.505, 18, -3.794), vect(100.159, 20, 29.547), vect(119.021, 18, 34.607), vect(132.642, 16.697, 43.188), vect(129.473, 12.012, 50.587), vect(112.545, 11, 47.479), vect(80.688, 20, 24.71), vect(69.703, 17, 40.598), vect(84.938, 14.302, 40.44), vect(94.461, 14.292, 47.987), vect(98.18, 18.012, 7.246), vect(47.973, 9, 3.54), vect(149.06, 15.849, 16.459), vect(154.641, 11.97, 12.383), vect(154.293, 14.012, 44.26), vect(170.44, 18.012, 56.821), vect(192.375, 18.012, 74.295), vect(199.885, 15.012, 63.386), vect(196.81, 13.464, 56.831), vect(36.34, 4.009, -20.595), vect(17.536, 4, -43.526), vect(33.385, 2.002, -2.863), vect(-6.54, 0.168, 12.159)]
-    elif MapName == "할리우드":
-    elif MapName == "하나무라":
-    elif MapName == "리장 타워" or MapName == "리장 타워 (설날)":
-    elif MapName == "블리자드 월드" or MapName == "블리자드 월드 (겨울)":
-    elif MapName == "아이헨발데" or MapName == "아이헨발데 (할로윈)":
-    elif MapName == "66번 국도":
-        DvaPos = [vect(42.483, 3.584, 57.946), vect(57.677, 3.584, 58.506), vect(-22.613, 9.617, -19.764), vect(-31.21, 9.632, -27.366), vect(-37.461, 9.637, -16.753), vect(-34.417, 9.641, -9.883), vect(-76.174, 11.7, -5.487), vect(-68.563, 11.7, -18.563), vect(-76.454, 10.829, -22.762), vect(-105.328, 9.7, -18.601), vect(55.524, 2.087, 25.894), vect(60.073, 3.578, 12.586), vect(53.342, 3.499, 3.937), vect(17.378, 3.295, -1.869), vect(-10.735, 4.508, -19.79), vect(-21.166, 4.508, -34.818), vect(-36.442, 4.508, -38.174), vect(5.436, 3.294, -7.928), vect(71.684, 1.128, 15.491), vect(62.374, 3.519, -0.998), vect(39.788, 3.295, 8.521), vect(28.68, 8.216, 22.142), vect(8.608, 8.36, 16.467), vect(35.356, 6.629, -20.277)]
-    elif MapName == "하바나":
-    elif MapName == "눔바니":
-    elif MapName == "파리":
-    elif MapName == "일리오스":
-    elif MapName == "볼스카야 인더스트리":
-    elif MapName == "호라이즌 달 기지":
-    elif MapName == "쓰레기촌":
-    elif MapName == "부산":
-    elif MapName == "오아시스":
-
-
-/*
-rule "디바 위치 저장용":
-    @Event eachPlayer
-    @Condition eventPlayer.isHoldingButton(Button.INTERACT) == true
-    
-    dvaposSaver = dvaposSaver.concat(eventPlayer.getPosition())
-    smallMessage(getAllPlayers(), "위치 저장됨.")
-*/
-
-/*
-rule "타이머 바꾸기":
-    @Event eachPlayer
-    @Condition eventPlayer.isHoldingButton(Button.INTERACT) == true
-    @Condition eventPlayer.isHoldingButton(Button.SECONDARY_FIRE) == true
-    
-    eventPlayer.Time = not eventPlayer.Time
-*/
-
 rule "플레이어 초기 설정":
     @Event playerJoined
     

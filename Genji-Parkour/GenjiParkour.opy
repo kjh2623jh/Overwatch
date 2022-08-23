@@ -531,8 +531,8 @@ rule "Dva":
         Dva.startScalingSize(100, true)
         Dva.forceButtonPress(Button.ULTIMATE)
         wait(3)
+    Dva.dva_position_arr = []
     destroyAllDummies()
-    Dva.
 
 
 rule "Save Inspector":
