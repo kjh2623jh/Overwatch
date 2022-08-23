@@ -145,7 +145,7 @@ rule "Init":
         Finished = true
     else:
         # hm
-        hudHeader(getAllPlayers(), "{0}".format(["개척 모드", "제작 모드"][GameMode]), HudPosition.LEFT, -2, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+        hudHeader(getAllPlayers(), "{0}".format(["개척 모드", "제작 모드"][GameMode]), HudPosition.LEFT, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         # hm
         hudHeader(Pioneer, "press {0}: 모드 변경".format(buttonString(Button.INTERACT)), HudPosition.TOP, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         PioneerHud.append(getLastCreatedText())
@@ -155,13 +155,13 @@ rule "Init":
         # hm
         hudHeader(Pioneer if Pioneer.is_pioneering else null, "개척해주세요", HudPosition.TOP, -1.1, Color.PURPLE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
         # to progress bar
-        hudHeader(getAllPlayers() if Pioneer.is_pioneering else null, "개척자: {0}".format(Pioneer), HudPosition.RIGHT, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+        hudHeader(getAllPlayers() if Pioneer.is_pioneering else null, "개척자: {0}".format(Pioneer), HudPosition.RIGHT, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         createEffect(Pioneer if PioneerCancelTimer else null, Effect.RING, Color.RED, PioneerPosition, CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
-        hudHeader(Pioneer if PioneerCancelTimer else null, "Cancel: {0} | Confirm: {1} {2}".format(buttonString(Button.PRIMARY_FIRE), buttonString(Button.SECONDARY_FIRE), ceil(PioneerCancelTimer)), HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.NEVER)
+        hudSubheader(Pioneer if PioneerCancelTimer else null, "Cancel: {0} | Confirm: {1} {2}".format(buttonString(Button.PRIMARY_FIRE), buttonString(Button.SECONDARY_FIRE), ceil(PioneerCancelTimer)), HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.NEVER)
     hudSubheader(getAllPlayers(), "v 0.1", HudPosition.LEFT, -1, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), "<discord server promote>", HudPosition.LEFT, 0, Color.GREEN, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
     # to SubHeader?
-    hudSubtext(getAllPlayers(), "server reset. {0}m left".format(270 - floor(getTotalTimeElapsed()/60)), HudPosition.RIGHT, 0, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubtext(getAllPlayers(), "server reset. {0}m left".format(270 - floor(getTotalTimeElapsed()/60)), HudPosition.RIGHT, -1, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     chase(PioneerCancelTimer, 0, rate=1, ChaseReeval.NONE)
 
 
@@ -199,9 +199,9 @@ rule "Player Joined":
     createEffect([player for player in eventPlayer if CheckPoint[eventPlayer.check_point+1]], Effect.RING, Color.GREEN, CheckPoint[eventPlayer.check_point+1], CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
     createEffect(eventPlayer if eventPlayer.is_invincible else null, Effect.ANA_NANO_BOOSTED, Color.GREEN, eventPlayer, 1, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
     createInWorldText(eventPlayer if CheckPoint[eventPlayer.check_point + 1] else null, "다음 개척지\n개척자: {0}".format(PioneerArr[eventPlayer.check_point+1]), CheckPoint[eventPlayer.check_point+1], 1.5, Clip.NONE, WorldTextReeval.VISIBILITY_POSITION_AND_STRING, Color.GREEN, SpecVisibility.DEFAULT)
-    hudHeader(eventPlayer, "{0}/{1}\n{2}".format(eventPlayer.check_point, len(CheckPoint)-1, "{0} {1} | {2}".format(abilityIconString(Hero.GENJI, Button.ABILITY_1), abs(AbilityArr[eventPlayer.check_point+1]-eventPlayer.ability), "{0} {1}".format(abilityIconString(Hero.GENJI, Button.ULTIMATE), abs(UltimateArr[eventPlayer.check_point+1]-eventPlayer.ultimate)))), HudPosition.TOP, -1, Color.BLUE, HudReeval.STRING, SpecVisibility.DEFAULT)
+    hudSubtext(eventPlayer, "{0}/{1}\n{2}".format(eventPlayer.check_point, len(CheckPoint)-1, "{0} {1} | {2}".format(abilityIconString(Hero.GENJI, Button.ABILITY_1), abs(AbilityArr[eventPlayer.check_point+1]-eventPlayer.ability), "{0} {1}".format(abilityIconString(Hero.GENJI, Button.ULTIMATE), abs(UltimateArr[eventPlayer.check_point+1]-eventPlayer.ultimate)))), HudPosition.TOP, -1, Color.BLUE, HudReeval.STRING, SpecVisibility.DEFAULT)
     # mb just effect
-    hudHeader(eventPlayer if eventPlayer.is_invincible else null, "연습모드", HudPosition.LEFT, 0, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    hudSubtext(eventPlayer if eventPlayer.is_invincible else null, "연습모드", HudPosition.TOP, 0, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), "{0} {1}".format(eventPlayer, eventPlayer.arrived_check_point), HudPosition.RIGHT, (sorted(getAllPlayers(), lambda player: -1 * player.arrived_check_point)).index(eventPlayer), Color.WHITE, HudReeval.VISIBILITY_SORT_ORDER_AND_STRING, SpecVisibility.DEFAULT)
     createIcon(eventPlayer if CheckPoint[eventPlayer.check_point+1] and not eventPlayer.isInViewAngle(CheckPoint[eventPlayer.check_point+1], 60) else null, CheckPoint[eventPlayer.check_point+1], Icon.FLAG, IconReeval.VISIBILITY_AND_POSITION, Color.GREEN, true)
 
@@ -263,8 +263,9 @@ def invincibleMode():
         eventPlayer.is_invincible = true
         eventPlayer.setAbility1Enabled(true)
         eventPlayer.setUltEnabled(true)
+        eventPlayer.setUltCharge(100)
         eventPlayer.setAbilityCooldown(Button.ABILITY_1, 0)
-        smallMessage(eventPlayer, "invincible mode")
+        smallMessage(eventPlayer, "연습 모드")
 
 
 rule "Die":
@@ -324,7 +325,6 @@ rule "Pioneered":
     eventPlayer.is_last_check_point = false
     if eventPlayer.is_invincible:
         invincibleMode()
-    smallMessage(eventPlayer, "pioneered")
     
     
 rule "Arrive":
@@ -351,7 +351,7 @@ rule "Arrive":
         CheckPointList[eventPlayer.player_index] += 1
 
 
-rule "Finish": # if this workshop is finished map
+rule "Finish":
     @Event eachPlayer
     @Condition eventPlayer.arrived_check_point == len(CheckPoint)-1
     @Condition Finished
@@ -364,7 +364,7 @@ rule "Restart":
     @Event eachPlayer
     @Condition eventPlayer.isHoldingButton(Button.CROUCH)
     @Condition eventPlayer.isHoldingButton(Button.ABILITY_1)
-    @Condition eventPlayer.isHoldingButton(Button.ULTIMATE)
+    @Condition eventPlayer.isHoldingButton(Button.ABILITY_2)
 
     eventPlayer.is_float = true
     eventPlayer.check_point = 0
@@ -406,6 +406,7 @@ rule "Abiliy 1":
 rule "Ultimate":
     @Event eachPlayer
     @Condition eventPlayer.isUsingUltimate()
+    @Condition eventPlayer.is_invincible == false
 
     if eventPlayer.is_pioneering and PioneerCancelTimer == false:
         eventPlayer.ultimate += 1
@@ -436,7 +437,7 @@ rule "MoveCp":
 
 rule "Invincible Mode":
     @Event eachPlayer
-    @Condition eventPlayer.isHoldingButton(Button.INTERACT)
+    @Condition eventPlayer.isHoldingButton(Button.ABILITY_2)
     @Condition eventPlayer.isHoldingButton(Button.MELEE)
     @Condition CheckPoint
 
@@ -463,7 +464,7 @@ rule "Spectate":
     @Event eachPlayer
     @Condition eventPlayer.isHoldingButton(Button.INTERACT)
 
-    wait(1, Wait.ABORT_WHEN_FALSE)
+    wait(0.5, Wait.ABORT_WHEN_FALSE)
     if eventPlayer.isAlive():
         if eventPlayer.is_last_check_point and Pioneer.is_pioneering:
             return
@@ -479,16 +480,17 @@ rule "Spectate":
 
 rule "Invisible Mode":
     @Event eachPlayer
-    @Condition eventPlayer.isHoldingButton(Button.ABILITY_1)
-    @Condition eventPlayer.isHoldingButton(Button.INTERACT)
-    @Condition eventPlayer.isHoldingButton(Button.JUMP)
+    @Condition eventPlayer.isHoldingButton(Button.CROUCH)
+    @Condition eventPlayer.isHoldingButton(Button.MELEE)
     @Condition eventPlayer.is_pioneering == false
 
     eventPlayer.is_invisible = not eventPlayer.is_invisible
     if eventPlayer.is_invisible:
         eventPlayer.setInvisibility(Invis.ALL)
+        smallMessage(eventPlayer, "투명화")
     else:
         eventPlayer.setInvisibility(Invis.NONE)
+        smallMessage(eventPlayer, "투명화 해제")
 
 
 rule "Revive":
