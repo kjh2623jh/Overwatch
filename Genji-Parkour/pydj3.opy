@@ -265,7 +265,7 @@ def serverloadbuffer():
 def serverloadbuffer2():
     @Name "서버부하방지용2"
     
-    hudSubtext(localPlayer, "{0}{1}{2}".format("{0}{1}{2}".format("{0}+{1}, {2}: ".format(buttonString(Button.INTERACT), buttonString(Button.JUMP), buttonString(Button.CROUCH)), "{0}{1}: {2}".format(Y[0], buttonString(Button.ULTIMATE), Y[41]), "{0}: {1}/{2}".format(Y[38], Y[39], Y[40])), "{0}{1}{2}".format("{0}: {1}".format(buttonString(Button.RELOAD), Y[1]) if localPlayer != E and localPlayer != M and A and AF and (localPlayer.B != len(A) - 1 or (not (not E or M))) else AO, "{0}: {1}".format(buttonString(Button.PRIMARY_FIRE), Y[32]) if localPlayer != M and localPlayer.isOnGround() and A[localPlayer.A + 1] else AO, "{0}+{1}: {2}".format(buttonString(Button.CROUCH), buttonString(Button.ULTIMATE), Y[6]) if X else AO), "{0}+{1}: {2}".format(buttonString(Button.INTERACT), buttonString(Button.ULTIMATE), Y[44]) if localPlayer == hostPlayer and AA and not E else AO), HudPosition.RIGHT, -1, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubtext(localPlayer, "{0}{1}".format("{0}+{1}: {2}\n".format(buttonString(Button.INTERACT), buttonString(Button.MELEE), text[5]) if invincible else null, "{0}{1}{2}".format("{0}{1}{2}".format("{0}+{1}, {2}: ".format(buttonString(Button.INTERACT), buttonString(Button.JUMP), buttonString(Button.CROUCH)), "{0}{1}: {2}".format(Y[0], buttonString(Button.ULTIMATE), Y[41]), "{0}: {1}/{2}".format(Y[38], Y[39], Y[40])), "{0}{1}{2}".format("{0}: {1}".format(buttonString(Button.RELOAD), Y[1]) if localPlayer != E and localPlayer != M and A and AF and (localPlayer.B != len(A) - 1 or (not (not E or M))) else AO, "{0}: {1}".format(buttonString(Button.PRIMARY_FIRE), Y[32]) if localPlayer != M and localPlayer.isOnGround() and A[localPlayer.A + 1] else AO, "{0}+{1}: {2}".format(buttonString(Button.CROUCH), buttonString(Button.ULTIMATE), Y[6]) if X else AO), "{0}+{1}: {2}".format(buttonString(Button.INTERACT), buttonString(Button.ULTIMATE), Y[44]) if localPlayer == hostPlayer and AA and not E else AO)), HudPosition.RIGHT, -1, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     if "{0}".format(Hero.GENJI) == "겐지":
         hudHeader([i for i in localPlayer if A], "{0}{1}{2}".format("현재 단계: {0}/{1}{2}".format(localPlayer.A + 1, len(A), (" {0}".format(getTotalTimeElapsed() - localPlayer.L) if timerSetting else " {0}:{1}".format(floor((getTotalTimeElapsed() - localPlayer.L) / 60), floor((getTotalTimeElapsed() - localPlayer.L) % 60))) if X and not localPlayer.K else AO), AO if not T else "\r\n {0}".format("{0}{1}".format(abilityIconString(localPlayer.getCurrentHero(), Button.ABILITY_1), C.last() if localPlayer == E else localPlayer.G)), AO if not S else "\r\n제한시간: {0}초".format(R[localPlayer.A] if localPlayer.isOnGround() else getTotalTimeElapsed() + 1 - localPlayer.I if localPlayer == E else 0 if localPlayer.A == len(A) - 1 else R[localPlayer.A] - (getTotalTimeElapsed() - localPlayer.I))), HudPosition.RIGHT, -3, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     elif "{0}".format(Hero.GENJI) == "源氏":
@@ -1207,17 +1207,17 @@ def genjiparkour():
     if "{0}".format(Hero.GENJI) == "겐지":
         Z = 1
         #한국
-        text = ["벽타기", "콩콩이", "벽타기 사용", "콩콩이 사용", "앉콩", "연습모드 / 일반모드              ", "연습모드", "일반모드", "삼단점프 금지됨", "벽캔 금지됨", "앉콩 금지됨", "감정표현 금지됨", "벽타기 금지됨", "콩콩이 금지됨"]
+        text = ["벽타기", "콩콩이", "벽타기 사용", "콩콩이 사용", "앉콩", "연습모드 / 일반모드", "연습모드", "일반모드", "삼단점프 금지됨", "벽캔 금지됨", "앉콩 금지됨", "감정표현 금지됨", "벽타기 금지됨", "콩콩이 금지됨"]
     elif "{0}".format(Hero.GENJI) == "源氏":
         Z = 2
         #중국
-        text = ["爬墙", "小跳", "爬墙已用", "小跳已用", "success", "无敌探点                ", "invincible mode", "normal mode", "Triple Jump is Disabled", "Multiclimb is Disabled", "Add Bhop is Disabled", "Emote jumping is Disabled", "Climb is Disabled", "Bhop is Disabled"]
+        text = ["爬墙", "小跳", "爬墙已用", "小跳已用", "success", "无敌探点", "invincible mode", "normal mode", "Triple Jump is Disabled", "Multiclimb is Disabled", "Add Bhop is Disabled", "Emote jumping is Disabled", "Climb is Disabled", "Bhop is Disabled"]
     elif "{0}".format(Hero.GENJI) == "ゲンジ":
         Z = 3
         #일본
-        text = ["climb", "bhop", "use climb", "use bhop", "success", "invincible / normal                ", "invincible mode", "normal mode", "Triple Jump is Disabled", "Multiclimb is Disabled", "Add Bhop is Disabled", "Emote jumping is Disabled", "Climb is Disabled", "Bhop is Disabled"]
+        text = ["climb", "bhop", "use climb", "use bhop", "success", "invincible / normal", "invincible mode", "normal mode", "Triple Jump is Disabled", "Multiclimb is Disabled", "Add Bhop is Disabled", "Emote jumping is Disabled", "Climb is Disabled", "Bhop is Disabled"]
     else:
-        text = ["climb", "bhop", "use climb", "use bhop", "success", "invincible / normal                ", "invincible mode", "normal mode", "Triple Jump is Disabled", "Multiclimb is Disabled", "Add Bhop is Disabled", "Emote jumping is Disabled", "Climb is Disabled", "Bhop is Disabled"]
+        text = ["climb", "bhop", "use climb", "use bhop", "success", "invincible / normal", "invincible mode", "normal mode", "Triple Jump is Disabled", "Multiclimb is Disabled", "Add Bhop is Disabled", "Emote jumping is Disabled", "Climb is Disabled", "Bhop is Disabled"]
     bannedSkills = []
     if not createWorkshopSetting(bool, "파쿠르 설정(Parkour Setting)", "벽타기(Climb)", true, 2):
         bannedSkills.append("벽타기")
@@ -1250,8 +1250,6 @@ def genjiparkour():
     climb = createWorkshopSetting(bool, "UI 설정(UI setting)", "벽타기 표시(climb box)", true, 1)
     climbtext = createWorkshopSetting(bool, "UI 설정(UI setting)", "벽타기 텍스트(climb small message)", true, 3)
     createbhoptext = createWorkshopSetting(bool, "UI 설정(UI setting)", "앉콩 텍스트(addbhop small message)", true, 5)
-    if invincible:
-        hudSubtext(localPlayer, "{0}+{1}: {2}".format(buttonString(Button.INTERACT), buttonString(Button.MELEE), text[5]), HudPosition.RIGHT, -2, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     if BreakFences:
         if A and not AA:
             goto lbl_2
