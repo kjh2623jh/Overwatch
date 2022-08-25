@@ -139,6 +139,7 @@ rule "Init":
     PioneerCancelTime = createWorkshopSetting(int[0:15], "Setting", "개척 취소 시간", 5, 0)
     PlayerList = []
     CheckPointList = []
+    Dva = 1
     save()
     if CheckPoint:
         hudHeader(getAllPlayers(), "제작: {0}".format(GameMode), HudPosition.LEFT, -2, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT) # 임시
@@ -505,6 +506,7 @@ rule "Revive":
 
 
 rule "Dva":
+    @Condition Dva
     @Condition getNumberOfPlayers(Team.1) < 12
 
     wait(2)
@@ -534,6 +536,7 @@ rule "Dva":
         Dva.forceButtonPress(Button.ULTIMATE)
         wait(3)
     Dva.dva_position_arr = []
+    Dva = 0
     destroyAllDummies()
 
 
