@@ -79,6 +79,8 @@ globalvar PioneerCancelTime
 globalvar PioneerCancelTimer
 globalvar PioneerCancel
 globalvar PioneerPosition
+globalvar PioneerTime
+globalvar Time
 globalvar Finished
 
 playervar check_point 
@@ -135,8 +137,9 @@ rule "Init":
     Pioneer = hostPlayer
     if not hostPlayer.hasSpawned():
         Pioneer = random.choice(getPlayers(Team.ALL))
-    PioneerMinDistans = createWorkshopSetting(int[1:20], "Setting", "개척 최소 거리", 7, 0)
-    PioneerCancelTime = createWorkshopSetting(int[0:15], "Setting", "개척 취소 시간", 5, 0)
+    PioneerMinDistans = createWorkshopSetting(int[1:20], "Setting", "개척 최소 거리", 7, 1)
+    PioneerCancelTime = createWorkshopSetting(int[0:15], "Setting", "개척 취소 시간", 5, 1)
+    Time = createWorkshopSetting(int[60:300], "Setting", "개척 제한시간", 120, 1)
     PlayerList = []
     CheckPointList = []
     save()
@@ -146,9 +149,9 @@ rule "Init":
         Finished = true
     else:
         # hm
-        hudHeader(getAllPlayers(), "{0}".format(["개척 모드", "제작 모드"][GameMode]), HudPosition.LEFT, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+        hudSubtext(getAllPlayers(), "{0}".format(["개척 모드", "제작 모드"][GameMode]), HudPosition.LEFT, 0, [Color.BLUE, Color.GREEN][GameMode], HudReeval.VISIBILITY_SORT_ORDER_STRING_AND_COLOR, SpecVisibility.DEFAULT)
         # hm
-        hudHeader(Pioneer, "press {0}: 모드 변경".format(buttonString(Button.INTERACT)), HudPosition.LEFT, -0.5, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+        hudSubtext(Pioneer, "press {0}: 모드 변경".format(buttonString(Button.INTERACT)), HudPosition.LEFT, -0.5, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         PioneerHud.append(getLastCreatedText())
         hudHeader(getAllPlayers(), "{0}님 시작할 장소로 가 {1}를 누르세요.".format(Pioneer, buttonString(Button.RELOAD)), HudPosition.RIGHT, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         PioneerHud.append(getLastCreatedText())
@@ -156,6 +159,7 @@ rule "Init":
         hudSubtext(Pioneer if Pioneer.is_pioneering else null, "개척해주세요", HudPosition.TOP, 0, Color.GREEN, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
         hudHeader(getAllPlayers() if Pioneer.is_pioneering else null, "개척자: {0}".format(Pioneer), HudPosition.RIGHT, -0.9, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         # progress bar
+        progressBarHud(getAllPlayers() if Pioneer.is_pioneering else null, PioneerTime / Time * 100, "개척 시간", HudPosition.RIGHT, -0.8, Color.WHITE, Color.WHITE, ProgressHudReeval.VISIBILITY_AND_VALUES, SpecVisibility.DEFAULT)
         hudHeader(getAllPlayers() if Pioneer.is_pioneering else null, "남은 시간", HudPosition.RIGHT, -0.8, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         createEffect(Pioneer if PioneerCancelTimer else null, Effect.RING, Color.RED, PioneerPosition, CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
         hudSubtext(Pioneer if PioneerCancelTimer else null, "Cancel: {0} - Confirm: {1} {2}".format(buttonString(Button.PRIMARY_FIRE), buttonString(Button.SECONDARY_FIRE), ceil(PioneerCancelTimer)), HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.NEVER)
@@ -167,13 +171,11 @@ rule "Init":
     chase(PioneerCancelTimer, 0, rate=1, ChaseReeval.NONE)
 
 
-/*
 rule "Switch Pioneer Modes":
     @Condition CheckPoint == false
     @Condition Pioneer.isHoldingButton(Button.INTERACT)
 
     GameMode = not GameMode
-*/
 
 
 rule "Player Joined":
@@ -282,7 +284,9 @@ rule "Die":
 
     if (CheckPoint[eventPlayer.check_point + 1] and distance(eventPlayer, CheckPoint[eventPlayer.check_point+1]) > CheckPointSize) \
         or (eventPlayer.is_pioneering and distance(eventPlayer, CheckPoint[eventPlayer.check_point]) <= PioneerMinDistans):
+        eventPlayer.is_float = true
         toCheckPoint()
+        eventPlayer.is_float = false
 
 
 rule "Pioneer":
@@ -293,6 +297,7 @@ rule "Pioneer":
     @Condition eventPlayer.is_float == false
     @Condition eventPlayer.isOnGround()
     @Condition distance(eventPlayer, CheckPoint[eventPlayer.check_point]) > PioneerMinDistans
+    @Condition PioneerTime == true
 
     eventPlayer.is_float = true
     PioneerPosition = eventPlayer.getPosition()
@@ -305,6 +310,7 @@ rule "Pioneer":
     if eventPlayer.isHoldingButton(Button.PRIMARY_FIRE):
         toCheckPoint()
     else:
+        stopChasingVariable(PioneerTime)
         CheckPoint.append(PioneerPosition)
         PioneerArr.append(eventPlayer.name)
         AbilityArr.append(eventPlayer.ability)
@@ -320,6 +326,20 @@ rule "Pioneer":
         toCheckPoint()
     eventPlayer.is_float = false
     
+
+
+rule "PioneerTime":
+    @Condition PioneerTime == false
+    @Condition Pioneer.is_pioneering == true
+
+    Pioneer.is_pioneering = false
+    if Pioneer.is_invisible == false:
+        Pioneer.setInvisibility(Invis.NONE)
+    Pioneer = random.choice([player for player in getAllPlayers() if player.arrived_check_point == len(CheckPoint)-1])
+    Pioneer.is_pioneering = true
+    PioneerTime = Time
+    Pioneer.setInvisibility(Invis.ALL)
+
 
 
 rule "Pioneered":
@@ -348,6 +368,8 @@ rule "Arrive":
         if (eventPlayer != Pioneer and not Pioneer.is_pioneering) or getNumberOfPlayers(Team.ALL) == 1:
             Pioneer = eventPlayer
             eventPlayer.is_pioneering = true
+            PioneerTime = Time
+            chase(PioneerTime, 0, rate=1, ChaseReeval.NONE)
             eventPlayer.setInvisibility(Invis.ALL)
         else:
             eventPlayer.is_last_check_point = true
@@ -391,7 +413,9 @@ rule "Reset":
         wait(0.1)
         eventPlayer.stopForcingPosition()
     else:
+        eventPlayer.is_float = true
         toCheckPoint()
+        eventPlayer.is_float = false
 
 
 rule "Abiliy 1":
@@ -428,6 +452,7 @@ rule "MoveCp":
     @Condition eventPlayer.isHoldingButton(Button.CROUCH)
     @Condition eventPlayer.isHoldingButton(Button.PRIMARY_FIRE) or eventPlayer.isHoldingButton(Button.SECONDARY_FIRE)
     @Condition eventPlayer.is_pioneering == false
+    @Condition eventPlayer.is_float == false
 
     eventPlayer.is_float = true
     if eventPlayer.isHoldingButton(Button.PRIMARY_FIRE):
