@@ -99,6 +99,11 @@ playervar dva_position_arr
 playervar dva_position
 playervar dva_index
 playervar is_invisible
+playervar time
+playervar climb
+playervar bhop
+playervar climb_num
+playervar check
 
 subroutine save 
 subroutine toCheckPoint 
@@ -109,7 +114,7 @@ subroutine invincibleMode
 
 
 def save():
-    @Name "paste here"
+    @Name "여기에 붙여넣으세요"
 
     smallMessage(hostPlayer, "Delete it")
     /*
@@ -160,14 +165,18 @@ rule "Init":
         hudHeader(getAllPlayers() if Pioneer.is_pioneering else null, "개척자: {0}".format(Pioneer), HudPosition.RIGHT, -0.9, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         # progress bar
         progressBarHud(getAllPlayers() if Pioneer.is_pioneering else null, PioneerTime / Time * 100, "개척 시간", HudPosition.RIGHT, -0.8, Color.WHITE, Color.WHITE, ProgressHudReeval.VISIBILITY_AND_VALUES, SpecVisibility.DEFAULT)
-        hudHeader(getAllPlayers() if Pioneer.is_pioneering else null, "남은 시간", HudPosition.RIGHT, -0.8, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         createEffect(Pioneer if PioneerCancelTimer else null, Effect.RING, Color.RED, PioneerPosition, CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
-        hudSubtext(Pioneer if PioneerCancelTimer else null, "Cancel: {0} - Confirm: {1} {2}".format(buttonString(Button.PRIMARY_FIRE), buttonString(Button.SECONDARY_FIRE), ceil(PioneerCancelTimer)), HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.NEVER)
-    hudSubheader(getAllPlayers(), "v 0.1", HudPosition.LEFT, -2, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
-    hudSubtext(getAllPlayers(), "discord link in youtube '(genji parkour) nemi'", HudPosition.LEFT, -1, Color.GREEN, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+        hudSubtext(Pioneer if PioneerCancelTimer else null, "취소: {0} - 결정: {1} {2}".format(buttonString(Button.PRIMARY_FIRE), buttonString(Button.SECONDARY_FIRE), ceil(PioneerCancelTimer)), HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.NEVER)
+    hudSubheader(localPlayer, "v 0.1", HudPosition.LEFT, -2, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    hudSubtext(localPlayer, "discord link in youtube '(genji parkour) nemi'", HudPosition.LEFT, -1, Color.GREEN, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
     # to SubHeader?
-    hudSubtext(getAllPlayers(), "server reset {0}m left".format(270 - floor(getTotalTimeElapsed()/60)), HudPosition.RIGHT, -2, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext(getAllPlayers(), "Combo List", HudPosition.LEFT, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubtext(localPlayer, "서버 재시작까지 {0}분".format(270 - floor(getTotalTimeElapsed()/60)), HudPosition.RIGHT, -2, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubtext(localPlayer, "제자리로: {0}\n관전: {1}꾹\n{2}".format(buttonString(Button.RELOAD), buttonString(Button.INTERACT), \
+                            "단계 이동: {0} + {1}/{2}".format(buttonString(Button.CROUCH), buttonString(Button.PRIMARY_FIRE), \
+                            "{0}\n{1}".format(buttonString(Button.SECONDARY_FIRE), \
+                            "연습모드: {0} + {1}\n{2}".format(buttonString(Button.MELEE), buttonString(Button.ABILITY_2), \
+                            "투명화: {0} + {1}\n{2}".format(buttonString(Button.CROUCH), buttonString(Button.MELEE), \
+                            "초기화: {0} + {1} + {2}".format(buttonString(Button.CROUCH), buttonString(Button.ABILITY_1), buttonString(Button.ABILITY_2))))))), HudPosition.LEFT, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     chase(PioneerCancelTimer, 0, rate=1, ChaseReeval.NONE)
 
 
@@ -203,12 +212,16 @@ rule "Player Joined":
     createEffect([player for player in eventPlayer if CheckPoint[eventPlayer.check_point+1]], Effect.RING, Color.GREEN, CheckPoint[eventPlayer.check_point+1], CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
     createEffect(eventPlayer if eventPlayer.is_invincible else null, Effect.ANA_NANO_BOOSTED, Color.GREEN, eventPlayer, 1, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
     createInWorldText(eventPlayer if CheckPoint[eventPlayer.check_point + 1] else null, "다음 개척지\n개척자: {0}".format(PioneerArr[eventPlayer.check_point+1]), CheckPoint[eventPlayer.check_point+1], 1.5, Clip.NONE, WorldTextReeval.VISIBILITY_POSITION_AND_STRING, Color.GREEN, SpecVisibility.DEFAULT)
-    hudSubtext(eventPlayer, "{0} / {1}".format(eventPlayer.check_point, len(CheckPoint)-1), HudPosition.TOP, -2, Color.BLUE, HudReeval.STRING, SpecVisibility.DEFAULT)
-    hudSubtext(eventPlayer, "{0} {1} | {2}".format(abilityIconString(Hero.GENJI, Button.ABILITY_1), abs(AbilityArr[eventPlayer.check_point+1]-eventPlayer.ability), "{0} {1}".format(abilityIconString(Hero.GENJI, Button.ULTIMATE), abs(UltimateArr[eventPlayer.check_point+1]-eventPlayer.ultimate))), HudPosition.TOP, -1, Color.BLUE, HudReeval.STRING, SpecVisibility.DEFAULT)
+    hudSubtext(eventPlayer, "{0} / {1} {2}".format(eventPlayer.check_point, len(CheckPoint)-1, "{0} {1} | {2}".format(abilityIconString(Hero.GENJI, Button.ABILITY_1), abs(AbilityArr[eventPlayer.check_point+1]-eventPlayer.ability), "{0} {1}".format(abilityIconString(Hero.GENJI, Button.ULTIMATE), abs(UltimateArr[eventPlayer.check_point+1]-eventPlayer.ultimate)))), HudPosition.TOP, -2, Color.BLUE, HudReeval.STRING, SpecVisibility.DEFAULT)
+    # visibility를 eventPlayer로 하고 내부 플레이어는 localPlayer로 했는데 이걸로 잘 작동되면 나머지도 다 이렇게 바꿀까
+    hudSubtext(eventPlayer, "{0} - {1}".format("      " if localPlayer.bhop else "콩콩이", "      " if localPlayer.climb else "벽타기{0}".format(localPlayer.climb_num if localPlayer.climb_num else "")), HudPosition.TOP, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     # mb just effect
     hudSubtext(eventPlayer if eventPlayer.is_invincible else null, "연습모드", HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), "{0} {1}".format(eventPlayer, eventPlayer.arrived_check_point), HudPosition.RIGHT, (sorted(getAllPlayers(), lambda player: -1 * player.arrived_check_point)).index(eventPlayer), Color.WHITE, HudReeval.VISIBILITY_SORT_ORDER_AND_STRING, SpecVisibility.DEFAULT)
     createIcon(eventPlayer if CheckPoint[eventPlayer.check_point+1] and not eventPlayer.isInViewAngle(CheckPoint[eventPlayer.check_point+1], 60) else null, CheckPoint[eventPlayer.check_point+1], Icon.FLAG, IconReeval.VISIBILITY_AND_POSITION, Color.GREEN, true)
+    if Finished:
+        eventPlayer.time = getTotalTimeElapsed()
+        hudSubtext(eventPlayer, "{0}:{1}".format(floor((getTotalTimeElapsed()-eventPlayer.time)/60), (getTotalTimeElapsed()-eventPlayer.time)%60), HudPosition.RIGHT, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
 
 
 rule "Create First Checkpoint":
@@ -230,7 +243,7 @@ rule "Create First Checkpoint":
 
 
 def toCheckPoint():
-    @Name "ToCheckpoint"
+    @Name "To Checkpoint"
 
     waitUntil(not eventPlayer.isUsingAbility1(), 3)
     eventPlayer.startForcingPosition(CheckPoint[eventPlayer.check_point], false)
@@ -240,7 +253,7 @@ def toCheckPoint():
 
 
 def abilityReset():
-    @Name "AbilityReset"
+    @Name "Ability Reset"
 
     waitUntil(not eventPlayer.isUsingAbility1(), 3)
     eventPlayer.setAbilityCooldown(Button.ABILITY_1, 0)
@@ -328,7 +341,7 @@ rule "Pioneer":
     
 
 
-rule "PioneerTime":
+rule "Pioneer Time":
     @Condition PioneerTime == false
     @Condition Pioneer.is_pioneering == true
 
@@ -386,7 +399,7 @@ rule "Finish":
     @Condition Finished
 
     invincibleMode()
-    bigMessage(eventPlayer, "Clear!!")
+    bigMessage(getAllPlayers(), "{0} Clear!! Time {1}".format(eventPlayer, "{0}:{1}".format(floor((getTotalTimeElapsed()-eventPlayer.time)/60), (getTotalTimeElapsed()-eventPlayer.time)%60)))
 
 
 rule "Restart":
@@ -447,7 +460,7 @@ rule "Ultimate":
             eventPlayer.setUltEnabled(false)
 
 
-rule "MoveCp":
+rule "Move Cp":
     @Event eachPlayer
     @Condition eventPlayer.isHoldingButton(Button.CROUCH)
     @Condition eventPlayer.isHoldingButton(Button.PRIMARY_FIRE) or eventPlayer.isHoldingButton(Button.SECONDARY_FIRE)
@@ -589,3 +602,88 @@ rule "Save Inspector":
     PlayerList = hostPlayer.save_temp[1]
     CheckPointList = hostPlayer.save_temp[2]
     hostPlayer.save_temp = []
+
+
+rule "Jump":
+    @Event eachPlayer
+    @Condition eventPlayer.isHoldingButton(Button.JUMP) == true
+    @Condition eventPlayer.check != 2
+    
+    eventPlayer.check += 1
+
+
+rule "Bhop":
+    @Event eachPlayer
+    @Condition eventPlayer.isHoldingButton(Button.JUMP) == false
+    @Condition eventPlayer.isInAir() == true
+    @Condition eventPlayer.check == 0
+    
+    eventPlayer.bhop = true
+
+
+rule "Triple Jump":
+    @Event eachPlayer
+    @Condition eventPlayer.check == 1
+    
+    wait(0.1, Wait.ABORT_WHEN_FALSE)
+    eventPlayer.check = 2
+
+
+rule "Triple Jump":
+    @Event eachPlayer
+    @Condition eventPlayer.check == 0
+    @Condition eventPlayer.isInAir() == true
+    
+    eventPlayer.check = 1
+
+
+rule "Climb":
+    @Event eachPlayer
+    @Condition eventPlayer.isOnWall() == true
+    @Condition eventPlayer.isHoldingButton(Button.JUMP) == true
+    
+    eventPlayer.climb = true
+
+
+rule "Multi Climb":
+    @Event eachPlayer
+    @Condition eventPlayer.isOnWall() == true
+    @Condition eventPlayer.climb == false
+    
+    eventPlayer.climb_num += 1
+
+
+rule "Emote":
+    @Event eachPlayer
+    @Condition eventPlayer.isCommunicatingEmote() == true
+    
+    eventPlayer.bhop = true
+
+
+rule "Create Bhop":
+    @Event eachPlayer
+    @Condition eventPlayer.isCrouching() == true
+    @Condition eventPlayer.isHoldingButton(Button.CROUCH) == true
+    @Condition eventPlayer.isInAir() == true
+    @Condition eventPlayer.isOnWall() == false
+    @Condition eventPlayer.isJumping() == false
+    @Condition eventPlayer.isHoldingButton(Button.JUMP) == false
+    @Condition eventPlayer.isOnGround() == false
+    
+    eventPlayer.bhop = true
+
+
+rule "Ground":
+    @Event eachPlayer
+    @Condition eventPlayer.isOnGround() == true
+    
+    eventPlayer.climb = false
+    eventPlayer.climb_num = 0
+    if distance(eventPlayer.getPosition(), A[eventPlayer.A]) > N:
+        goto lbl_0
+    eventPlayer.check = 0
+    lbl_0:
+    wait(0)
+    if eventPlayer.check != 0 and eventPlayer.isOnGround() == true:
+        goto RULE_START
+    eventPlayer.bhop = false
