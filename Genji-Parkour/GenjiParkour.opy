@@ -274,12 +274,15 @@ def invincibleMode():
         eventPlayer.is_invincible = false
         toCheckPoint()
         eventPlayer.is_float = false
+        stopChasingVariable(eventPlayer.time)
     else:
         eventPlayer.is_invincible = true
         eventPlayer.setAbility1Enabled(true)
         eventPlayer.setUltEnabled(true)
         eventPlayer.setUltCharge(100)
         eventPlayer.setAbilityCooldown(Button.ABILITY_1, 0)
+        if Finished:
+            chase(eventPlayer.time, 99999999, rate=1, ChaseReeval.NONE)
         smallMessage(eventPlayer, "연습 모드")
 
 
@@ -528,11 +531,14 @@ rule "Spectate":
         eventPlayer.disableRespawn()
         eventPlayer.is_float = true
         kill(eventPlayer, null)
+        if Finished:
+            chase(eventPlayer.time, 99999999, rate=1, ChaseReeval.NONE)
     else:
         eventPlayer.enableRespawn()
         eventPlayer.respawn()
         toCheckPoint()
         eventPlayer.is_float = false
+        stopChasingVariable(eventPlayer.time)
 
 
 rule "Invisible Mode":
@@ -614,6 +620,7 @@ rule "Save Inspector":
     PlayerList = hostPlayer.save_temp[1]
     CheckPointList = hostPlayer.save_temp[2]
     hostPlayer.save_temp = []
+    smallMessage(hostPlayer, "저장됨")
 
 
 rule "Jump":
@@ -656,6 +663,7 @@ rule "Climb":
     
     eventPlayer.climb = true
     eventPlayer.check = 2
+    smallMessage(eventPlayer, "벽타기")
 
 
 rule "Multi Climb":
@@ -692,6 +700,7 @@ rule "Use Bhop":
     @Condition eventPlayer.bhop == true
 
     eventPlayer.bhop = false
+    smallMessage(eventPlayer, "콩콩이")
 
 
 rule "Ground":
