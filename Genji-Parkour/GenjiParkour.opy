@@ -76,7 +76,6 @@ globalvar CheckPointList
 globalvar Dva
 globalvar PioneerCancelTime
 globalvar PioneerCancelTimer
-globalvar PioneerCancel
 globalvar PioneerPosition
 globalvar PioneerTime
 globalvar Time
@@ -87,7 +86,6 @@ playervar arrived_check_point
 playervar is_pioneering
 playervar is_float
 playervar is_invincible
-playervar pioneer_ability
 playervar ability
 playervar ultimate
 playervar name
@@ -178,7 +176,7 @@ rule "Init":
     chase(PioneerCancelTimer, 0, rate=1, ChaseReeval.NONE)
 
 
-rule "Switch Pioneer Modes":
+rule "Switch Modes":
     @Condition CheckPoint == false
     @Condition Pioneer.isHoldingButton(Button.INTERACT)
 
