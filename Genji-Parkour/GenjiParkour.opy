@@ -4,7 +4,7 @@
 settings {
     "main": {
         "modeName": "겐지 파쿠르",
-        "description": "Created by: 훈제김치\nCode: <code>\nhttps://discord.gg/dyGvBbBgxV\n<date>"
+        "description": "Created by: 훈제김치\nCode: 95969\nhttps://discord.gg/dyGvBbBgxV\nv 0.1"
     },
     "lobby": {
         "returnToLobby": "never",
@@ -135,6 +135,7 @@ rule "Init":
     disableGamemodeCompletion()
     disableAnnouncer()
     disableMusic()
+    pauseMatchTime()
     PioneerHud = []
     CheckPointSize = createWorkshopSetting(float[0.1:3], "Setting", "개척지 크기", 1.5, 0)
     waitUntil(hostPlayer.hasSpawned(),5)
@@ -149,32 +150,30 @@ rule "Init":
     save()
     Dva = 1
     if CheckPoint:
-        hudHeader(getAllPlayers(), "제작: {0}".format(GameMode), HudPosition.LEFT, -2, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT) # 임시
+        hudSubtext(getAllPlayers(), GameMode, HudPosition.LEFT, 0, Color.GREEN, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
         Finished = true
     else:
-        # hm
         hudHeader(getAllPlayers(), "{0}".format(["개척 모드", "제작 모드"][GameMode]), HudPosition.LEFT, 0, [Color.BLUE, Color.GREEN][GameMode], HudReeval.VISIBILITY_SORT_ORDER_STRING_AND_COLOR, SpecVisibility.DEFAULT)
-        # hm
         hudHeader(Pioneer, "press {0}: 모드 변경".format(buttonString(Button.INTERACT)), HudPosition.LEFT, -0.5, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         PioneerHud.append(getLastCreatedText())
         hudHeader(getAllPlayers(), "{0}님 시작할 장소로 가 {1}를 누르세요.".format(Pioneer, buttonString(Button.RELOAD)), HudPosition.RIGHT, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         PioneerHud.append(getLastCreatedText())
-        # hm
         hudSubtext(Pioneer if Pioneer.is_pioneering else null, "개척해주세요", HudPosition.TOP, 0, Color.GREEN, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
         hudHeader(getAllPlayers() if Pioneer.is_pioneering else null, "개척자: {0}".format(Pioneer), HudPosition.RIGHT, -0.9, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-        # progress bar
-        progressBarHud(getAllPlayers() if Pioneer.is_pioneering else null, PioneerTime / Time * 100, "개척 시간", HudPosition.RIGHT, -0.8, Color.WHITE, Color.WHITE, ProgressHudReeval.VISIBILITY_AND_VALUES, SpecVisibility.DEFAULT)
+        progressBarHud(getAllPlayers() if Pioneer.is_pioneering and getNumberOfPlayers(Team.ALL) > 1 else null, PioneerTime / Time * 100, "개척 시간", HudPosition.RIGHT, -0.8, Color.WHITE, Color.WHITE, ProgressHudReeval.VISIBILITY_AND_VALUES, SpecVisibility.DEFAULT)
         createEffect(Pioneer if PioneerCancelTimer else null, Effect.RING, Color.RED, PioneerPosition, CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
         hudSubtext(Pioneer if PioneerCancelTimer else null, "취소: {0} - 결정: {1} {2}".format(buttonString(Button.PRIMARY_FIRE), buttonString(Button.SECONDARY_FIRE), ceil(PioneerCancelTimer)), HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.NEVER)
     hudSubheader(localPlayer, "v 0.1", HudPosition.LEFT, -2, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
-    hudSubtext(localPlayer, "discord link in youtube '(genji parkour) nemi'", HudPosition.LEFT, -1, Color.GREEN, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
-    hudSubheader(localPlayer, "서버 재시작까지 {0}분".format(270 - floor(getTotalTimeElapsed()/60)), HudPosition.RIGHT, -2, Color.GREEN, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext(localPlayer, "제자리: {0}\n관전: {1}꾹\n{2}".format(buttonString(Button.RELOAD), buttonString(Button.INTERACT), \
+    hudSubtext(localPlayer, "유튜브 '(겐지파쿠르) nemi'\n디스코드도 있어요\n", HudPosition.LEFT, -1, Color.BLUE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    hudSubtext(localPlayer, "\n\n제자리: {0}\n관전: {1}꾹\n{2}".format(buttonString(Button.RELOAD), buttonString(Button.INTERACT), \
                             "단계 이동: {0} + {1} / {2}".format(buttonString(Button.CROUCH), buttonString(Button.PRIMARY_FIRE), \
                             "{0}\n{1}".format(buttonString(Button.SECONDARY_FIRE), \
                             "연습모드: {0} + {1}\n{2}".format(buttonString(Button.MELEE), buttonString(Button.ABILITY_2), \
                             "투명화: {0} + {1}\n{2}".format(buttonString(Button.CROUCH), buttonString(Button.MELEE), \
-                            "초기화: {0} + {1} + {2}".format(buttonString(Button.CROUCH), buttonString(Button.ABILITY_1), buttonString(Button.ABILITY_2))))))), HudPosition.LEFT, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+                            "초기화: {0} + {1} + {2}".format(buttonString(Button.CROUCH), buttonString(Button.ABILITY_1), \
+                            "{0}\n개척 저장: {1} + {2}".format(buttonString(Button.ABILITY_2), buttonString(Button.MELEE), buttonString(Button.RELOAD)) if localPlayer == hostPlayer else buttonString(Button.ABILITY_2))))))), HudPosition.LEFT, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubheader(localPlayer, "서버 재시작까지 {0}분".format(270 - floor(getTotalTimeElapsed()/60)), HudPosition.RIGHT, -2, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubheader(localPlayer, '\n', HudPosition.RIGHT, -0.1, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
     chase(PioneerCancelTimer, 0, rate=1, ChaseReeval.NONE)
 
 
@@ -192,7 +191,7 @@ rule "Player Joined":
     eventPlayer.enableDeathSpectateTargetHud()
     eventPlayer.setAbility2Enabled(false)
     eventPlayer.disablePlayerCollision()
-    eventPlayer.disableGamemodeHud() # 임시
+    eventPlayer.disableGamemodeHud()
     eventPlayer.name = "{0}".format(eventPlayer)
     if eventPlayer.name in PlayerList:
         eventPlayer.player_index = PlayerList.index(eventPlayer.name)
@@ -210,14 +209,13 @@ rule "Player Joined":
     createEffect([player for player in eventPlayer if CheckPoint[eventPlayer.check_point+1]], Effect.RING, Color.GREEN, CheckPoint[eventPlayer.check_point+1], CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
     createEffect(getAllPlayers() if eventPlayer.is_invincible else null, Effect.ANA_NANO_BOOSTED, Color.GREEN, eventPlayer, 1, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
     createInWorldText(eventPlayer if CheckPoint[eventPlayer.check_point + 1] else null, "다음 개척지\n개척자: {0}".format(PioneerArr[eventPlayer.check_point+1]), CheckPoint[eventPlayer.check_point+1], 1.5, Clip.NONE, WorldTextReeval.VISIBILITY_POSITION_AND_STRING, Color.GREEN, SpecVisibility.DEFAULT)
-    hudSubtext(eventPlayer, "【{0} {1} | {2}".format(abilityIconString(Hero.GENJI, Button.ABILITY_1), abs(AbilityArr[eventPlayer.check_point+1]-eventPlayer.ability), "{0} {1}】  【{2}".format(abilityIconString(Hero.GENJI, Button.ULTIMATE), abs(UltimateArr[eventPlayer.check_point+1]-eventPlayer.ultimate), "{0} / {1}】".format(eventPlayer.check_point, len(CheckPoint)-1))), HudPosition.TOP, -2, Color.BLUE, HudReeval.STRING, SpecVisibility.DEFAULT)
-    hudSubtext(eventPlayer, "{0} - {1}".format("콩콩이" if eventPlayer.bhop else "       ", "       " if eventPlayer.climb else "벽타기{0}".format("({0})".format(eventPlayer.climb_num) if localPlayer.climb_num else "")), HudPosition.TOP, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubtext(eventPlayer, "【{0} {1} | {2}".format(abilityIconString(Hero.GENJI, Button.ABILITY_1), abs(AbilityArr[eventPlayer.check_point+1]-eventPlayer.ability), "{0} {1}】   【{2}".format(abilityIconString(Hero.GENJI, Button.ULTIMATE), abs(UltimateArr[eventPlayer.check_point+1]-eventPlayer.ultimate), "{0} / {1}】{2}".format(eventPlayer.check_point, len(CheckPoint)-1, "   【{0}:{1}】".format(floor((getTotalTimeElapsed()-eventPlayer.time)/60), floor((getTotalTimeElapsed()-eventPlayer.time)%60)) if Finished else ''))), HudPosition.TOP, -2, Color.GREEN, HudReeval.STRING, SpecVisibility.DEFAULT)
+    hudSubtext(eventPlayer, "{0} - {1}".format("콩콩이" if eventPlayer.bhop else "        ", "        " if eventPlayer.climb else "벽타기{0}".format("({0})".format(eventPlayer.climb_num) if localPlayer.climb_num else "")), HudPosition.TOP, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(eventPlayer if eventPlayer.is_invincible else null, "연습모드", HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), "{0} {1}".format(eventPlayer, eventPlayer.arrived_check_point), HudPosition.RIGHT, (sorted(getAllPlayers(), lambda player: -1 * player.arrived_check_point)).index(eventPlayer), Color.WHITE, HudReeval.VISIBILITY_SORT_ORDER_AND_STRING, SpecVisibility.DEFAULT)
     createIcon(eventPlayer if CheckPoint[eventPlayer.check_point+1] and not eventPlayer.isInViewAngle(CheckPoint[eventPlayer.check_point+1], 60) else null, CheckPoint[eventPlayer.check_point+1], Icon.FLAG, IconReeval.VISIBILITY_AND_POSITION, Color.GREEN, true)
     if Finished:
         eventPlayer.time = getTotalTimeElapsed()
-        hudSubtext(eventPlayer, "{0}:{1}".format(floor((getTotalTimeElapsed()-eventPlayer.time)/60), (getTotalTimeElapsed()-eventPlayer.time)%60), HudPosition.RIGHT, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
 
 
 rule "Create First Checkpoint":
@@ -230,15 +228,10 @@ rule "Create First Checkpoint":
     destroyHudText(PioneerHud[1])
     destroyHudText(PioneerHud[2])
     PioneerHud = null
-    Pioneer.is_pioneering = true
-    Pioneer.is_invincible = false
     CheckPoint = [Pioneer.getPosition()]
     PioneerArr = ["{0}".format(Pioneer)]
     AbilityArr = [0]
     UltimateArr = [0]
-    PioneerTime = Time
-    chase(PioneerTime, 0, rate=1, ChaseReeval.NONE)
-    Pioneer.setInvisibility(Invis.ALL)
 
 
 def toCheckPoint():
@@ -256,12 +249,7 @@ def abilityReset():
 
     waitUntil(not eventPlayer.isUsingAbility1(), 3)
     eventPlayer.setAbilityCooldown(Button.ABILITY_1, 0)
-    eventPlayer.ability = 0
-    eventPlayer.ultimate = 0
     eventPlayer.setAbility1Enabled(true)
-    if eventPlayer.isUsingUltimate():
-        kill(eventPlayer, null)
-        eventPlayer.resurrect()
     eventPlayer.setUltEnabled(true)
     eventPlayer.setUltCharge(100)
     if CheckPoint[eventPlayer.check_point+1] and eventPlayer.is_pioneering == false and eventPlayer.is_invincible == false:
@@ -269,6 +257,12 @@ def abilityReset():
             eventPlayer.setAbility1Enabled(false)
         if UltimateArr[eventPlayer.check_point+1]==0:
             eventPlayer.setUltEnabled(false)
+    waitUntil(not eventPlayer.isUsingAbility1(), 3)
+    if eventPlayer.isUsingUltimate():
+        kill(eventPlayer, null)
+        eventPlayer.resurrect()
+    eventPlayer.ability = 0
+    eventPlayer.ultimate = 0
 
         
 def invincibleMode():
@@ -301,7 +295,7 @@ rule "Die":
         eventPlayer.is_float = false
 
 
-rule "toPioneer":
+rule "Pioneer Start":
     @Event eachPlayer
     @Condition eventPlayer == Pioneer
     @Condition CheckPoint
@@ -310,8 +304,9 @@ rule "toPioneer":
     if eventPlayer.is_invincible:
         invincibleMode()
     eventPlayer.is_pioneering = true
-    PioneerTime = Time
-    chase(PioneerTime, 0, rate=1, ChaseReeval.NONE)
+    if getNumberOfPlayers(Team.ALL) > 1:
+        PioneerTime = Time
+        chase(PioneerTime, 0, rate=1, ChaseReeval.NONE)
     eventPlayer.setInvisibility(Invis.ALL)
 
 
@@ -323,7 +318,6 @@ rule "Pioneer":
     @Condition eventPlayer.is_float == false
     @Condition eventPlayer.isOnGround()
     @Condition distance(eventPlayer, CheckPoint[eventPlayer.check_point]) > PioneerMinDistans
-    @Condition PioneerTime == true
 
     eventPlayer.is_float = true
     PioneerPosition = eventPlayer.getPosition()
@@ -333,13 +327,13 @@ rule "Pioneer":
     waitUntil(eventPlayer.isHoldingButton(Button.PRIMARY_FIRE) or eventPlayer.isHoldingButton(Button.SECONDARY_FIRE), PioneerCancelTime)
     eventPlayer.is_invincible = false
     PioneerCancelTimer = 0
-    if eventPlayer.isHoldingButton(Button.SECONDARY_FIRE):
+    if not eventPlayer.isHoldingButton(Button.PRIMARY_FIRE):
         stopChasingVariable(PioneerTime)
         CheckPoint.append(PioneerPosition)
         PioneerArr.append(eventPlayer.name)
         AbilityArr.append(eventPlayer.ability)
         UltimateArr.append(eventPlayer.ultimate)
-        if getNumberOfPlayers(Team.ALL) > 1 or eventPlayer.isHoldingButton(Button.INTERACT):
+        if getNumberOfPlayers(Team.ALL) > 1 or eventPlayer.isHoldingButton(Button.CROUCH):
             eventPlayer.is_pioneering = false
             if eventPlayer.is_invisible == false:
                 eventPlayer.setInvisibility(Invis.NONE)
@@ -354,6 +348,7 @@ rule "Pioneer":
 rule "Pioneer Time":
     @Condition PioneerTime == false
     @Condition Pioneer.is_pioneering == true
+    @Condition getNumberOfPlayers(Team.ALL) > 1
 
     Pioneer.is_pioneering = false
     if Pioneer.is_invisible == false:
@@ -385,6 +380,8 @@ rule "Arrive":
     eventPlayer.check_point+=1
     if eventPlayer.check_point == len(CheckPoint)-1 and Finished == false:
         if (eventPlayer != Pioneer and not Pioneer.is_pioneering) or getNumberOfPlayers(Team.ALL) == 1:
+            Pioneer = 0
+            wait(0)
             Pioneer = eventPlayer
         else:
             eventPlayer.is_last_check_point = true
@@ -393,6 +390,17 @@ rule "Arrive":
     if eventPlayer.check_point > eventPlayer.arrived_check_point:
         eventPlayer.arrived_check_point += 1
         CheckPointList[eventPlayer.player_index] += 1
+
+
+rule "Player Left":
+    @Event playerLeft
+    @Condition CheckPoint
+
+    wait(0.1)
+    if getNumberOfPlayers(Team.ALL) < 2:
+        PioneerTime = 0
+    if eventPlayer == Pioneer:
+        Pioneer = random.choice([player for player in getAllPlayers() if player.arrived_check_point == len(CheckPoint)-1])
 
 
 rule "Finish":
