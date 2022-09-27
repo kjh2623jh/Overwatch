@@ -333,9 +333,7 @@ rule "Pioneer":
     waitUntil(eventPlayer.isHoldingButton(Button.PRIMARY_FIRE) or eventPlayer.isHoldingButton(Button.SECONDARY_FIRE), PioneerCancelTime)
     eventPlayer.is_invincible = false
     PioneerCancelTimer = 0
-    if eventPlayer.isHoldingButton(Button.PRIMARY_FIRE):
-        toCheckPoint()
-    else:
+    if eventPlayer.isHoldingButton(Button.SECONDARY_FIRE):
         stopChasingVariable(PioneerTime)
         CheckPoint.append(PioneerPosition)
         PioneerArr.append(eventPlayer.name)
@@ -349,7 +347,7 @@ rule "Pioneer":
             eventPlayer.check_point += 1
             eventPlayer.arrived_check_point += 1
             CheckPointList[eventPlayer.player_index] += 1
-        toCheckPoint()
+    toCheckPoint()
     eventPlayer.is_float = false
     
 
@@ -403,7 +401,7 @@ rule "Finish":
     @Condition Finished
 
     invincibleMode()
-    bigMessage(getAllPlayers(), "{0} Clear!! Time {1}".format(eventPlayer, "{0}:{1}".format(floor((getTotalTimeElapsed()-eventPlayer.time)/60), (getTotalTimeElapsed()-eventPlayer.time)%60)))
+    bigMessage(getAllPlayers(), "{0} 클리어!! {1}".format(eventPlayer, "{0}:{1}".format(floor((getTotalTimeElapsed()-eventPlayer.time)/60), (getTotalTimeElapsed()-eventPlayer.time)%60)))
 
 
 rule "Restart":
