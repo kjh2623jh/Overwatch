@@ -154,6 +154,7 @@ rule "Init":
         Finished = true
     else:
         hudHeader(getAllPlayers(), "{0}".format(["개척 모드", "제작 모드"][GameMode]), HudPosition.LEFT, 0, [Color.BLUE, Color.GREEN][GameMode], HudReeval.VISIBILITY_SORT_ORDER_STRING_AND_COLOR, SpecVisibility.DEFAULT)
+        hudSubheader(getAllPlayers(), "제작 모드 제작중",HudPosition.LEFT, 0.1, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
         hudHeader(Pioneer, "press {0}: 모드 변경".format(buttonString(Button.INTERACT)), HudPosition.LEFT, -0.5, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         PioneerHud.append(getLastCreatedText())
         hudHeader(getAllPlayers(), "{0}님 시작할 장소로 가 {1}를 누르세요.".format(Pioneer, buttonString(Button.RELOAD)), HudPosition.RIGHT, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
