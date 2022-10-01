@@ -51,7 +51,12 @@ rule "Position":
     @Event eachPlayer
     @Condition eventPlayer.hasSpawned() == true
     
-    eventPlayer.startForcingPosition(eventPlayer.getPosition() + ((eventPlayer.getFacingDirection() * eventPlayer.getThrottle().z + ((angleToDirection(eventPlayer.getHorizontalFacingAngle() + 90, 0)) * eventPlayer.getThrottle().x) + (Vector.DOWN * ((1 if eventPlayer.isHoldingButton(Button.ULTIMATE) else -1) if eventPlayer.isHoldingButton(Button.ULTIMATE) or eventPlayer.isHoldingButton(Button.ABILITY_2) else 0))) * (0.5 + eventPlayer.isHoldingButton(Button.ABILITY_1))), true)
+    eventPlayer.startForcingPosition(
+        eventPlayer.getPosition() 
+        + ((eventPlayer.getFacingDirection() * eventPlayer.getThrottle().z 
+        + ((angleToDirection(eventPlayer.getHorizontalFacingAngle() + 90, 0)) * eventPlayer.getThrottle().x) 
+        + (Vector.DOWN * ((1 if eventPlayer.isHoldingButton(Button.ULTIMATE) else -1) if eventPlayer.isHoldingButton(Button.ULTIMATE) or eventPlayer.isHoldingButton(Button.ABILITY_2) else 0))) 
+        * (0.5 + eventPlayer.isHoldingButton(Button.ABILITY_1))), true)
 
 
 rule "Camera":
