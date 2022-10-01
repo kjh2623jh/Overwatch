@@ -1,4 +1,7 @@
 settings {
+    "main": {
+        "modeName": "관전 플라이",
+    },
     "gamemodes": {
         "ffa": {
             "enabledMaps": [
