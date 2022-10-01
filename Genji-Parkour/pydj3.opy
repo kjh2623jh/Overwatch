@@ -1248,6 +1248,7 @@ def genjiparkour():
     climb = createWorkshopSetting(bool, "UI 설정(UI setting)", "벽타기 표시(climb box)", true, 1)
     climbtext = createWorkshopSetting(bool, "UI 설정(UI setting)", "벽타기 텍스트(climb small message)", true, 3)
     createbhoptext = createWorkshopSetting(bool, "UI 설정(UI setting)", "앉콩 텍스트(addbhop small message)", true, 5)
+    Dva = 1
 
 
 rule "연습모드":
@@ -1515,6 +1516,7 @@ rule "금지 | 벽캔":
 
 
 rule "Dva":
+    @Condition Dva == 1
     @Condition getNumberOfPlayers(Team.1) < 12
 
     wait(2)
@@ -1544,6 +1546,7 @@ rule "Dva":
         Dva.forceButtonPress(Button.ULTIMATE)
         wait(3)
     Dva.dva_position_arr = []
+    Dva = 0
     destroyAllDummies()
 
     

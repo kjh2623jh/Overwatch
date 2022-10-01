@@ -144,6 +144,7 @@ rule "Init":
     Pioneer = hostPlayer
     if not hostPlayer.hasSpawned():
         Pioneer = random.choice(getPlayers(Team.ALL))
+    Pioneer.is_pioneering = true
     PioneerMinDistans = createWorkshopSetting(int[1:20], "Setting", "개척 최소 거리", 7, 1)
     PioneerCancelTime = createWorkshopSetting(int[0:15], "Setting", "개척 취소 시간", 5, 1)
     Time = createWorkshopSetting(int[60:300], "Setting", "개척 제한시간", 120, 1)
@@ -166,6 +167,7 @@ rule "Init":
     else:
         hudHeader(getAllPlayers(), "{0}".format(["개척 모드", "제작 모드"][GameMode]), HudPosition.LEFT, 0, [Color.BLUE, Color.GREEN][GameMode], HudReeval.VISIBILITY_SORT_ORDER_STRING_AND_COLOR, SpecVisibility.DEFAULT)
         hudSubheader(getAllPlayers(), "제작 모드 제작중",HudPosition.LEFT, 0.1, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+        PioneerHud.append(getLastCreatedText())
         hudHeader(Pioneer, "{0}: 모드 변경".format(buttonString(Button.INTERACT)), HudPosition.LEFT, -0.5, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         PioneerHud.append(getLastCreatedText())
         hudHeader(getAllPlayers(), "{0}님 시작할 장소로 가 {1}를 누르세요.".format(Pioneer, buttonString(Button.RELOAD)), HudPosition.RIGHT, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
@@ -198,6 +200,7 @@ rule "Switch Modes":
 
 rule "Player Joined":
     @Event playerJoined
+    @Condition eventPlayer.hasSpawned() == true
     
     eventPlayer.enableDeathSpectateAllPlayers()
     eventPlayer.enableDeathSpectateTargetHud()
@@ -210,11 +213,12 @@ rule "Player Joined":
         eventPlayer.check_point = CheckPointList[eventPlayer.player_index]
         eventPlayer.time = TimeList[eventPlayer.player_index]
         eventPlayer.arrived_check_point = eventPlayer.check_point
+        toCheckPoint()
     else:
-        eventPlayer.player_index = len(PlayerList)
         PlayerList.append(eventPlayer.name)
         TimeList.append(eventPlayer.time)
         CheckPointList.append(eventPlayer.check_point)
+        eventPlayer.player_index = PlayerList.index(eventPlayer.name)
     if CheckPoint == false:
         if eventPlayer.is_pioneering == false:
             eventPlayer.is_last_check_point = true
@@ -224,7 +228,7 @@ rule "Player Joined":
     createEffect(getAllPlayers() if eventPlayer.is_invincible else null, Effect.ANA_NANO_BOOSTED, Color.GREEN, eventPlayer, 1, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
     createInWorldText(eventPlayer if CheckPoint[eventPlayer.check_point + 1] else null, "다음 개척지\n개척자: {0}".format(PioneerArr[eventPlayer.check_point+1]), CheckPoint[eventPlayer.check_point+1], 1.5, Clip.NONE, WorldTextReeval.VISIBILITY_POSITION_AND_STRING, Color.GREEN, SpecVisibility.DEFAULT)
     hudSubtext(eventPlayer, "【{0} {1} | {2}".format(abilityIconString(Hero.GENJI, Button.ABILITY_1), abs(AbilityArr[eventPlayer.check_point+1]-eventPlayer.ability), "{0} {1}】   【{2}".format(abilityIconString(Hero.GENJI, Button.ULTIMATE), abs(UltimateArr[eventPlayer.check_point+1]-eventPlayer.ultimate), "{0} / {1}】{2}".format(eventPlayer.check_point, len(CheckPoint)-1, "   【{0} : {1}】".format(floor(eventPlayer.time/60), floor(eventPlayer.time%60)) if Finished else ''))), HudPosition.TOP, -2, Color.GREEN, HudReeval.STRING, SpecVisibility.DEFAULT)
-    hudSubtext(eventPlayer, "{0} - {1}".format("콩콩이" if eventPlayer.bhop else "        ", "        " if eventPlayer.climb else "벽타기{0}".format("({0})".format(eventPlayer.climb_num) if localPlayer.climb_num else "")), HudPosition.TOP, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubtext(eventPlayer, "{0} - {1}".format("콩콩이" if eventPlayer.bhop else "        ", "        " if eventPlayer.climb else "벽타기{0}".format("({0})".format(eventPlayer.climb_num) if eventPlayer.climb_num else "")), HudPosition.TOP, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(eventPlayer if eventPlayer.is_invincible else null, "연습모드", HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), "{0} {1}".format(eventPlayer, eventPlayer.arrived_check_point), HudPosition.RIGHT, (sorted(getAllPlayers(), lambda player: -1 * player.arrived_check_point)).index(eventPlayer), Color.WHITE, HudReeval.VISIBILITY_SORT_ORDER_AND_STRING, SpecVisibility.DEFAULT)
     createIcon(eventPlayer if CheckPoint[eventPlayer.check_point+1] and not eventPlayer.isInViewAngle(CheckPoint[eventPlayer.check_point+1], 60) else null, CheckPoint[eventPlayer.check_point+1], Icon.FLAG, IconReeval.VISIBILITY_AND_POSITION, Color.GREEN, true)
@@ -241,6 +245,7 @@ rule "Create First Checkpoint":
     destroyHudText(PioneerHud[0])
     destroyHudText(PioneerHud[1])
     destroyHudText(PioneerHud[2])
+    destroyHudText(PioneerHud[3])
     PioneerHud = null
     CheckPoint = [Pioneer.getPosition()]
     PioneerArr = ["{0}".format(Pioneer)]
@@ -544,6 +549,7 @@ rule "Ultimate Charge":
     @Event eachPlayer
     @Condition eventPlayer.getUltCharge() < 100
 
+    wait(0.5)
     eventPlayer.setUltCharge(100)
         
 
