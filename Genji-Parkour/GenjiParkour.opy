@@ -140,11 +140,10 @@ rule "Init":
     pauseMatchTime()
     PioneerHud = []
     CheckPointSize = createWorkshopSetting(float[0.1:3], "Setting", "개척지 크기", 1.5, 0)
-    waitUntil(hostPlayer.hasSpawned(),5)
+    waitUntil(hostPlayer.hasSpawned(), 5)
     Pioneer = hostPlayer
     if not hostPlayer.hasSpawned():
         Pioneer = random.choice(getPlayers(Team.ALL))
-    Pioneer.is_pioneering = true
     PioneerMinDistans = createWorkshopSetting(int[1:20], "Setting", "개척 최소 거리", 7, 1)
     PioneerCancelTime = createWorkshopSetting(int[0:15], "Setting", "개척 취소 시간", 5, 1)
     Time = createWorkshopSetting(int[60:300], "Setting", "개척 제한시간", 120, 1)
@@ -187,7 +186,7 @@ rule "Init":
                             "초기화: {0} + {1} + {2}".format(buttonString(Button.CROUCH), buttonString(Button.ABILITY_1),
                             "{0}\n개척 저장: {1} + {2}".format(buttonString(Button.ABILITY_2), buttonString(Button.MELEE), buttonString(Button.RELOAD)) if localPlayer == hostPlayer else buttonString(Button.ABILITY_2))))))), HudPosition.LEFT, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubheader(localPlayer, "서버 재시작까지 {0}분".format(270 - floor(getTotalTimeElapsed()/60)), HudPosition.RIGHT, -2, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubheader(localPlayer, '\n\nplayr list', HudPosition.RIGHT, -0.1, Color.BLUE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    hudSubheader(getAllPlayers(), '\n\nplayr list', HudPosition.RIGHT, -0.1, Color.BLUE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
     chase(PioneerCancelTimer, 0, rate=1, ChaseReeval.NONE)
 
 
@@ -200,8 +199,7 @@ rule "Switch Modes":
 
 rule "Player Joined":
     @Event playerJoined
-    @Condition eventPlayer.hasSpawned() == true
-    
+
     eventPlayer.enableDeathSpectateAllPlayers()
     eventPlayer.enableDeathSpectateTargetHud()
     eventPlayer.setAbility2Enabled(false)
@@ -220,7 +218,7 @@ rule "Player Joined":
         CheckPointList.append(eventPlayer.check_point)
         eventPlayer.player_index = PlayerList.index(eventPlayer.name)
     if CheckPoint == false:
-        if eventPlayer.is_pioneering == false:
+        if eventPlayer == Pioneer:
             eventPlayer.is_last_check_point = true
         invincibleMode()
     createEffect(eventPlayer, Effect.RING, Color.WHITE, CheckPoint[eventPlayer.check_point], CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
