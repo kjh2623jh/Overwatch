@@ -1,4 +1,4 @@
-rule("Rule 1")
+rule("Auto Multiclimb")
 {
 	event
 	{
