@@ -1,4 +1,4 @@
-rule("텔포")
+rule("Teleport")
 {
 	event
 	{
