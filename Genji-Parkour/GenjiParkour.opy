@@ -63,6 +63,7 @@ settings {
 
 
 globalvar GameMode
+globalvar Text
 globalvar CheckPoint
 globalvar PioneerArr
 globalvar AbilityArr
@@ -85,6 +86,7 @@ globalvar Top3List
 globalvar TopPlayerList
 globalvar TopTimeList
 
+playervar language
 playervar check_point 
 playervar arrived_check_point
 playervar is_pioneering
@@ -138,15 +140,16 @@ rule "Init":
     disableAnnouncer()
     disableMusic()
     pauseMatchTime()
+    Text = [["en"], ["kr"]]
     PioneerHud = []
-    CheckPointSize = createWorkshopSetting(float[0.1:3], "Setting", "개척지 크기", 1.5, 0)
+    CheckPointSize = createWorkshopSetting(float[0.1:3], "Setting", "개척지 크기 (CheckPoint Size)", 1.5, 0)
     waitUntil(hostPlayer.hasSpawned(), 5)
     Pioneer = hostPlayer
     if not hostPlayer.hasSpawned():
         Pioneer = random.choice(getPlayers(Team.ALL))
-    PioneerMinDistans = createWorkshopSetting(int[1:20], "Setting", "개척 최소 거리", 7, 1)
-    PioneerCancelTime = createWorkshopSetting(int[0:15], "Setting", "개척 취소 시간", 5, 1)
-    Time = createWorkshopSetting(int[60:300], "Setting", "개척 제한시간", 120, 1)
+    PioneerMinDistans = createWorkshopSetting(int[1:20], "Setting", "개척 최소 거리 (Pioneer Minimum Distance)", 7, 1)
+    PioneerCancelTime = createWorkshopSetting(int[0:15], "Setting", "개척 취소 시간 (Pioneer Time to Cancel)", 5, 1)
+    Time = createWorkshopSetting(int[60:300], "Setting", "개척 제한시간 (Pioneer Time Limit)", 120, 1)
     PlayerList = []
     TimeList = []
     CheckPointList = []
@@ -165,7 +168,6 @@ rule "Init":
         Finished = true
     else:
         hudHeader(getAllPlayers(), "{0}".format(["개척 모드", "제작 모드"][GameMode]), HudPosition.LEFT, 0, [Color.BLUE, Color.GREEN][GameMode], HudReeval.VISIBILITY_SORT_ORDER_STRING_AND_COLOR, SpecVisibility.DEFAULT)
-        hudSubheader(getAllPlayers(), "제작 모드 제작중",HudPosition.LEFT, 0.1, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
         PioneerHud.append(getLastCreatedText())
         hudHeader(Pioneer, "{0}: 모드 변경".format(buttonString(Button.INTERACT)), HudPosition.LEFT, -0.5, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         PioneerHud.append(getLastCreatedText())
@@ -197,6 +199,12 @@ rule "Switch Modes":
     GameMode = not GameMode
 
 
+rule "edit mode not allowed":
+    @Condition GameMode
+
+    GameMode = not GameMode
+
+
 rule "Player Joined":
     @Event playerJoined
 
@@ -205,6 +213,8 @@ rule "Player Joined":
     eventPlayer.setAbility2Enabled(false)
     eventPlayer.disablePlayerCollision()
     eventPlayer.disableGamemodeHud()
+    if "{0}".format(Hero.GENJI) == "겐지":
+        eventPlayer.language = 1
     eventPlayer.name = "{0}".format(eventPlayer)
     if eventPlayer.name in PlayerList:
         eventPlayer.player_index = PlayerList.index(eventPlayer.name)
