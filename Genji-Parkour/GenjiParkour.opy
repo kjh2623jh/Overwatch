@@ -140,8 +140,8 @@ rule "Init":
     disableAnnouncer()
     disableMusic()
     pauseMatchTime()
-    Text = [["pioneer mode", "edit mode", "change mode", ", press ", " to set starting point", "Pioneer plz"< "Pioneer", "Pioneer Time", "Cancel", "Confirm", "Youtube '(genjiparkour) nemi'\ndiscord is on youtube\n"], 
-            ["개척 모드", "제작 모드", "모드 변경", "님, 시작할 위치에서 ", "를 누르세요.", "개척해주세요", "개척자", "개척 시간", "취소", "결정", "유튜브 '(겐지파쿠르) nemi'\n디스코드도 있어요\n"]]
+    Text = [["pioneer mode", "edit mode", "change mode", ", press ", " to set starting point", "Pioneer plz", "Pioneer", "Pioneer Time", "Cancel", "Confirm", "Youtube '(genjiparkour) nemi'\ndiscord is on youtube\n", "server reset ", "m left", "next checkpoint\npioneer: ", "bhop", "climb", "invincible", "Clear!!", "invisible", "invisible off"], 
+            ["개척 모드", "제작 모드", "모드 변경", "님, 시작할 위치에서 ", "를 누르세요.", "개척해주세요", "개척자", "개척 시간", "취소", "결정", "유튜브 '(겐지파쿠르) nemi'\n디스코드도 있어요\n", "서버 재시작까지 ", "분", "다음 개척지\n개척자: ", "콩콩이", "벽타기", "연습모드", "클리어!!", "투명화", "투명화 해제"]]
     PioneerHud = []
     CheckPointSize = createWorkshopSetting(float[0.1:3], "Setting", "개척지 크기 (CheckPoint Size)", 1.5, 0)
     waitUntil(hostPlayer.hasSpawned(), 5)
@@ -178,17 +178,25 @@ rule "Init":
         hudHeader(localPlayer if Pioneer.is_pioneering else null, "{0}: {1}".format(Text[localPlayer.language][6], Pioneer), HudPosition.RIGHT, -0.9, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.ALWAYS)
         progressBarHud(localPlayer if Pioneer.is_pioneering and getNumberOfPlayers(Team.ALL) > 1 else null, PioneerTime / Time * 100, Text[localPlayer.language][7], HudPosition.RIGHT, -0.8, Color.WHITE, Color.WHITE, ProgressHudReeval.VISIBILITY_AND_VALUES, SpecVisibility.ALWAYS)
         createEffect(Pioneer if PioneerCancelTimer else null, Effect.RING, Color.RED, PioneerPosition, CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
-        hudSubtext(Pioneer if PioneerCancelTimer else null, "취소: {0} - 결정: {1} {2}".format(buttonString(Button.PRIMARY_FIRE), buttonString(Button.SECONDARY_FIRE), ceil(PioneerCancelTimer)), HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.NEVER)
+        hudSubtext(Pioneer if PioneerCancelTimer else null, "{0}: {1} - {2}".format(Text[Pioneer.language][8], buttonString(Button.PRIMARY_FIRE), 
+                                                            "{0}: {1} {2}".format(Text[Pioneer.language][9], buttonString(Button.SECONDARY_FIRE), ceil(PioneerCancelTimer))), HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.NEVER)
     hudSubheader(localPlayer, "v 0.1", HudPosition.LEFT, -2, Color.WHITE, HudReeval.NONE, SpecVisibility.DEFAULT)
-    hudSubtext(localPlayer, "유튜브 '(겐지파쿠르) nemi'\n디스코드도 있어요\n", HudPosition.LEFT, -1, Color.BLUE, HudReeval.STRING, SpecVisibility.DEFAULT)
-    hudSubtext(localPlayer, "\n\n제자리: {0}\n관전: {1}꾹\n{2}".format(buttonString(Button.RELOAD), buttonString(Button.INTERACT),
+    hudSubtext(localPlayer, Text[localPlayer.language][10], HudPosition.LEFT, -1, Color.BLUE, HudReeval.STRING, SpecVisibility.DEFAULT)
+    hudSubtext(localPlayer, ["\n\nreset: {0}\nspectate: hold {1}\n{2}".format(buttonString(Button.RELOAD), buttonString(Button.INTERACT),
+                            "move checkpoint: {0} + {1} / {2}".format(buttonString(Button.CROUCH), buttonString(Button.PRIMARY_FIRE),
+                            "{0}\n{1}".format(buttonString(Button.SECONDARY_FIRE),
+                            "invincible: {0} + {1}\n{2}".format(buttonString(Button.MELEE), buttonString(Button.ABILITY_2),
+                            "invisible: {0} + {1}\n{2}".format(buttonString(Button.CROUCH), buttonString(Button.MELEE),
+                            "restart: {0} + {1} + {2}".format(buttonString(Button.CROUCH), buttonString(Button.ABILITY_1),
+                            "{0}\ninspector save: {1} + {2}".format(buttonString(Button.ABILITY_2), buttonString(Button.MELEE), buttonString(Button.RELOAD)) if localPlayer == hostPlayer else buttonString(Button.ABILITY_2))))))),
+                            "\n\n제자리: {0}\n관전: {1}꾹\n{2}".format(buttonString(Button.RELOAD), buttonString(Button.INTERACT),
                             "단계 이동: {0} + {1} / {2}".format(buttonString(Button.CROUCH), buttonString(Button.PRIMARY_FIRE),
                             "{0}\n{1}".format(buttonString(Button.SECONDARY_FIRE),
                             "연습모드: {0} + {1}\n{2}".format(buttonString(Button.MELEE), buttonString(Button.ABILITY_2),
                             "투명화: {0} + {1}\n{2}".format(buttonString(Button.CROUCH), buttonString(Button.MELEE),
                             "초기화: {0} + {1} + {2}".format(buttonString(Button.CROUCH), buttonString(Button.ABILITY_1),
-                            "{0}\n개척 저장: {1} + {2}".format(buttonString(Button.ABILITY_2), buttonString(Button.MELEE), buttonString(Button.RELOAD)) if localPlayer == hostPlayer else buttonString(Button.ABILITY_2))))))), HudPosition.LEFT, 1, Color.WHITE, HudReeval.STRING, SpecVisibility.DEFAULT)
-    hudSubheader(localPlayer, "서버 재시작까지 {0}분".format(270 - floor(getTotalTimeElapsed()/60)), HudPosition.RIGHT, -2, Color.BLUE, HudReeval.STRING, SpecVisibility.DEFAULT)
+                            "{0}\n개척 저장: {1} + {2}".format(buttonString(Button.ABILITY_2), buttonString(Button.MELEE), buttonString(Button.RELOAD)) if localPlayer == hostPlayer else buttonString(Button.ABILITY_2)))))))][localPlayer.language], HudPosition.LEFT, 1, Color.WHITE, HudReeval.STRING, SpecVisibility.DEFAULT)
+    hudSubheader(localPlayer, "{0}{1}{2}".format(Text[localPlayer.language][11], 270 - floor(getTotalTimeElapsed()/60), Text[localPlayer.language][12]), HudPosition.RIGHT, -2, Color.BLUE, HudReeval.STRING, SpecVisibility.DEFAULT)
     hudSubheader(localPlayer, '\n\nplayr list', HudPosition.RIGHT, -0.1, Color.BLUE, HudReeval.NONE, SpecVisibility.ALWAYS)
     chase(PioneerCancelTimer, 0, rate=1, ChaseReeval.NONE)
 
@@ -236,10 +244,10 @@ rule "Player Joined":
     createEffect(eventPlayer, Effect.RING, Color.WHITE, CheckPoint[eventPlayer.check_point], CheckPointSize, EffectReeval.POSITION_AND_RADIUS)
     createEffect([player for player in eventPlayer if CheckPoint[eventPlayer.check_point+1]], Effect.RING, Color.GREEN, CheckPoint[eventPlayer.check_point+1], CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
     createEffect(getAllPlayers() if eventPlayer.is_invincible else null, Effect.ANA_NANO_BOOSTED, Color.GREEN, eventPlayer, 1, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
-    createInWorldText(eventPlayer if CheckPoint[eventPlayer.check_point + 1] else null, "다음 개척지\n개척자: {0}".format(PioneerArr[eventPlayer.check_point+1]), CheckPoint[eventPlayer.check_point+1], 1.5, Clip.NONE, WorldTextReeval.VISIBILITY_POSITION_AND_STRING, Color.GREEN, SpecVisibility.DEFAULT)
+    createInWorldText(eventPlayer if CheckPoint[eventPlayer.check_point + 1] else null, "{0}{1}".format(Text[localPlayer.language][13], PioneerArr[eventPlayer.check_point+1]), CheckPoint[eventPlayer.check_point+1], 1.5, Clip.NONE, WorldTextReeval.VISIBILITY_POSITION_AND_STRING, Color.GREEN, SpecVisibility.DEFAULT)
     hudSubtext(eventPlayer, "【{0} {1} | {2}".format(abilityIconString(Hero.GENJI, Button.ABILITY_1), abs(AbilityArr[eventPlayer.check_point+1]-eventPlayer.ability), "{0} {1}】   【{2}".format(abilityIconString(Hero.GENJI, Button.ULTIMATE), abs(UltimateArr[eventPlayer.check_point+1]-eventPlayer.ultimate), "{0} / {1}】{2}".format(eventPlayer.check_point, len(CheckPoint)-1, "   【{0} : {1}】".format(floor(eventPlayer.time/60), floor(eventPlayer.time%60)) if Finished else ''))), HudPosition.TOP, -2, Color.GREEN, HudReeval.STRING, SpecVisibility.DEFAULT)
-    hudSubtext(eventPlayer, "{0} - {1}".format("콩콩이" if eventPlayer.bhop else "        ", "        " if eventPlayer.climb else "벽타기{0}".format("({0})".format(eventPlayer.climb_num) if eventPlayer.climb_num else "")), HudPosition.TOP, -1, Color.WHITE, HudReeval.STRING, SpecVisibility.DEFAULT)
-    hudSubtext(eventPlayer if eventPlayer.is_invincible else null, "연습모드", HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    hudSubtext(eventPlayer, "{0} - {1}".format(Text[localPlayer.language][14] if eventPlayer.bhop else "        ", "        " if eventPlayer.climb else "{0}{1}".format(Text[localPlayer.language][15], "({0})".format(eventPlayer.climb_num) if eventPlayer.climb_num else "")), HudPosition.TOP, -1, Color.WHITE, HudReeval.STRING, SpecVisibility.DEFAULT)
+    hudSubtext(eventPlayer if eventPlayer.is_invincible else null, Text[localPlayer.language][16], HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), "{0} {1}".format(eventPlayer, eventPlayer.arrived_check_point), HudPosition.RIGHT, (sorted(getAllPlayers(), lambda player: -1 * player.arrived_check_point)).index(eventPlayer), Color.WHITE, HudReeval.VISIBILITY_SORT_ORDER_AND_STRING, SpecVisibility.DEFAULT)
     createIcon(eventPlayer if CheckPoint[eventPlayer.check_point+1] and not eventPlayer.isInViewAngle(CheckPoint[eventPlayer.check_point+1], 60) else null, CheckPoint[eventPlayer.check_point+1], Icon.FLAG, IconReeval.VISIBILITY_AND_POSITION, Color.GREEN, true)
     if Finished:
@@ -313,7 +321,7 @@ def invincibleMode():
         eventPlayer.setUltCharge(100)
         eventPlayer.setAbilityCooldown(Button.ABILITY_1, 0)
         stopChasingVariable(eventPlayer.time)
-        smallMessage(eventPlayer, "연습 모드")
+        smallMessage(eventPlayer, Text[localPlayer.language][16])
 
 
 rule "Die":
@@ -450,7 +458,7 @@ rule "Finish":
         TopPlayerList.append(eventPlayer.name)
         TopTimeList.append(eventPlayer.time)
     Top3List = sorted(TopTimeList)
-    bigMessage(getAllPlayers(), "{0} 클리어!! {1}".format(eventPlayer, "{0}:{1}".format(floor(eventPlayer.time/60), floor(eventPlayer.time%60))))
+    bigMessage(getAllPlayers(), "{0} {1} {2}".format(eventPlayer.name, Text[localPlayer.language][17], "{0}:{1}".format(floor(eventPlayer.time/60), floor(eventPlayer.time%60))))
 
 
 rule "Restart":
@@ -593,10 +601,10 @@ rule "Invisible Mode":
     eventPlayer.is_invisible = not eventPlayer.is_invisible
     if eventPlayer.is_invisible:
         eventPlayer.setInvisibility(Invis.ALL)
-        smallMessage(eventPlayer, "투명화")
+        smallMessage(eventPlayer, Text[localPlayer.language][18])
     else:
         eventPlayer.setInvisibility(Invis.NONE)
-        smallMessage(eventPlayer, "투명화 해제")
+        smallMessage(eventPlayer, Text[localPlayer.language][19])
 
 
 rule "Revive":
@@ -709,7 +717,7 @@ rule "Climb":
     
     eventPlayer.climb = true
     eventPlayer.check = 2
-    smallMessage(eventPlayer, "벽타기")
+    smallMessage(eventPlayer, Text[localPlayer.language][15])
 
 
 rule "Multi Climb":
@@ -747,7 +755,7 @@ rule "Use Bhop":
     @Condition eventPlayer.bhop == true
 
     eventPlayer.bhop = false
-    smallMessage(eventPlayer, "콩콩이")
+    smallMessage(eventPlayer, Text[localPlayer.language][14])
 
 
 rule "Ground":
