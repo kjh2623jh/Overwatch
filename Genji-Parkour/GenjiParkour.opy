@@ -140,6 +140,7 @@ rule "Init":
     disableAnnouncer()
     disableMusic()
     pauseMatchTime()
+    # len(Text) == 20
     Text = [["pioneer mode", "edit mode", "change mode", ", press ", " to set starting point", "Pioneer plz", "Pioneer", "Pioneer Time", "Cancel", "Confirm", "Youtube '(genjiparkour) nemi'\ndiscord is on youtube\n", "server reset ", "m left", "next checkpoint\npioneer: ", "bhop", "climb", "invincible", "Clear!!", "invisible", "invisible off"], 
             ["개척 모드", "제작 모드", "모드 변경", "님, 시작할 위치에서 ", "를 누르세요.", "개척해주세요", "개척자", "개척 시간", "취소", "결정", "유튜브 '(겐지파쿠르) nemi'\n디스코드도 있어요\n", "서버 재시작까지 ", "분", "다음 개척지\n개척자: ", "콩콩이", "벽타기", "연습모드", "클리어!!", "투명화", "투명화 해제"]]
     PioneerHud = []
@@ -420,6 +421,7 @@ rule "Arrive":
     @Condition distance(eventPlayer, CheckPoint[eventPlayer.check_point + 1]) < CheckPointSize
     
     eventPlayer.check_point+=1
+    playEffect(getAllPlayers(), DynamicEffect.RING_EXPLOSION, Color.GREEN, eventPlayer, 10)
     if eventPlayer.check_point == len(CheckPoint)-1 and Finished == false:
         if (eventPlayer != Pioneer and not Pioneer.is_pioneering) or getNumberOfPlayers(Team.ALL) == 1:
             Pioneer = 0
