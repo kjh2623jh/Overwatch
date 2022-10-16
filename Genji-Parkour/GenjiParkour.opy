@@ -3,8 +3,11 @@
 
 settings {
     "main": {
-        "modeName": "겐지 파쿠르",
-        "description": "Created by: 훈제김치\nCode: 95969\nhttps://discord.gg/dyGvBbBgxV\nv 0.1"
+        "modeName": "<FG30FF0Bf>겐지 파쿠르",
+        # <FG30FF0Bf> : 초록색
+        # <FGFF0000f> : 빨간색
+        # <FGFFFFFFf> : 기본 글자 색
+        "description": "Created by: <FG30FF0Bf>훈제김치<FGFFFFFFf>\nCode: <FG30FF0Bf>95969\nhttps://discord.gg/dyGvBbBgxV<FGFFFFFFf>\nv 0.1"
     },
     "lobby": {
         "returnToLobby": "never",
@@ -34,7 +37,6 @@ settings {
             "respawnTime%": 0,
             "spawnHealthPacks": "disabled",
             "enableKillFeed": false,
-            "roleLimit": "2OfEachRolePerTeam",
             "enableHeroSwitching": false,
             "heroLimit": "off",
             "enableEnemyHealthBars": false,
@@ -627,7 +629,7 @@ rule "Dva":
     wait(2)
     createDummy(Hero.DVA, Team.1, -1, vect(0, 10, 0), vect(0, 0, 0))
     Dva = getLastCreatedEntity()
-    Dva.dva_position_arr = [[0, Map.NEPAL, Map.DORADO, Map.LIJIANG_TOWER, Map.LIJIANG_TOWER_LNY, Map.BUSAN, Map.BLIZZ_WORLD, Map.BLIZZ_WORLD_WINTER, Map.OASIS, Map.ILIOS, Map.PARIS], [vect(-50, 15, 0), vect(-195, -90, 0)], [vect(90, 10, -1)], [vect(0, 270, 280), vect(0, 95, 150), vect(0, 0, -35)], [vect(0, 270, 280), vect(0, 95, 150), vect(0, 0, -35)], [vect(50, 15, -115), vect(-330, 15, 140), vect(215, 15, 225)], [vect(-45, 5, 95)], [vect(-45, 5, 95)], [vect(-190, 15, 0), vect(135, 10, -240), vect(145, 10, 250)], [vect(30, 60, -155), vect(-200, 1, 10), vect(320, -20, -35)] ,[vect(-45, 15, -10)]]
+    Dva.dva_position_arr = [[0, Map.NEPAL, Map.NUMBANI, Map.DORADO, Map.LIJIANG_TOWER, Map.LIJIANG_TOWER_LNY, Map.BUSAN, Map.BLIZZ_WORLD, Map.BLIZZ_WORLD_WINTER, Map.OASIS, Map.ILIOS, Map.PARIS], [vect(-50, 15, 0), vect(-195, -90, 0)], [vect(100, -1, 25)], [vect(90, 10, -1)], [vect(0, 270, 280), vect(0, 95, 150), vect(0, 0, -35)], [vect(0, 270, 280), vect(0, 95, 150), vect(0, 0, -35)], [vect(50, 15, -115), vect(-330, 15, 140), vect(215, 15, 225)], [vect(-45, 5, 95)], [vect(-45, 5, 95)], [vect(-190, 15, 0), vect(135, 10, -240), vect(145, 10, 250)], [vect(30, 60, -155), vect(-200, 1, 10), vect(320, -20, -35)] ,[vect(-45, 15, -10)]]
     Dva.dva_index = Dva.dva_position_arr[0].index(getCurrentMap())
     wait(1)
     Dva.setInvisibility(Invis.ALL)
