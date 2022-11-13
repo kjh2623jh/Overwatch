@@ -163,45 +163,45 @@ rule "Init":
         Top3List = []
         TopPlayerList = []
         TopTimeList = []
-        hudSubtext(localPlayer, GameMode, HudPosition.LEFT, 0, Color.GREEN, HudReeval.NONE, SpecVisibility.ALWAYS)
-        hudSubheader(localPlayer, "\n\nTop 3", HudPosition.RIGHT, -1.1, Color.BLUE, HudReeval.NONE, SpecVisibility.ALWAYS)
+        hudSubtext(localPlayer, GameMode, HudPosition.LEFT, 0, Color.GREEN, HudReeval.VISIBILITY, SpecVisibility.ALWAYS)
+        hudSubheader(localPlayer, "\n\nTop 3", HudPosition.RIGHT, -1.1, Color.BLUE, HudReeval.VISIBILITY, SpecVisibility.ALWAYS)
         hudSubtext(localPlayer, "{0}".format(
                                     "1. {0}  {1}{2}".format(TopPlayerList[TopTimeList.index(Top3List[0])], "{0} : {1}".format(floor(Top3List[0]/60), floor(Top3List[0]%60)), 
                                     "\n2. {0}  {1}{2}".format(TopPlayerList[TopTimeList.index(Top3List[1])], "{0} : {1}".format(floor(Top3List[1]/60), floor(Top3List[1]%60)), 
-                                    "\n3. {0}  {1}".format(TopPlayerList[TopTimeList.index(Top3List[1])], "{0} : {1}".format(floor(Top3List[1]/60), floor(Top3List[1]%60))) if Top3List[2] else '') if Top3List[1] else '') if Top3List[0] else ''), HudPosition.RIGHT, -1, Color.GREEN, HudReeval.STRING, SpecVisibility.ALWAYS)
+                                    "\n3. {0}  {1}".format(TopPlayerList[TopTimeList.index(Top3List[1])], "{0} : {1}".format(floor(Top3List[1]/60), floor(Top3List[1]%60))) if Top3List[2] else '') if Top3List[1] else '') if Top3List[0] else ''), HudPosition.RIGHT, -1, Color.GREEN, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.ALWAYS)
         Finished = true
     else:
-        hudHeader(localPlayer, [Text[localPlayer.language][0], Text[localPlayer.language][1]][GameMode], HudPosition.LEFT, 0, [Color.BLUE, Color.GREEN][GameMode], HudReeval.STRING_AND_COLOR, SpecVisibility.ALWAYS)
+        hudHeader(localPlayer, [Text[localPlayer.language][0], Text[localPlayer.language][1]][GameMode], HudPosition.LEFT, 0, [Color.BLUE, Color.GREEN][GameMode], HudReeval.VISIBILITY_STRING_AND_COLOR, SpecVisibility.ALWAYS)
         PioneerHud.append(getLastCreatedText())
         hudHeader(Pioneer, "{0}: {1}".format(buttonString(Button.INTERACT), Text[Pioneer.language][2]), HudPosition.LEFT, -0.5, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         PioneerHud.append(getLastCreatedText())
-        hudHeader(localPlayer, "{0}{1}{2}".format(Pioneer, Text[localPlayer.language][3], "{0}{1}".format(buttonString(Button.RELOAD), Text[localPlayer.language][4])), HudPosition.RIGHT, -1, Color.WHITE, HudReeval.STRING, SpecVisibility.ALWAYS)
+        hudHeader(localPlayer, "{0}{1}{2}".format(Pioneer, Text[localPlayer.language][3], "{0}{1}".format(buttonString(Button.RELOAD), Text[localPlayer.language][4])), HudPosition.RIGHT, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.ALWAYS)
         PioneerHud.append(getLastCreatedText())
-        hudSubtext(Pioneer if Pioneer.is_pioneering else null, Text[Pioneer.language][5], HudPosition.TOP, 0, Color.GREEN, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+        hudSubtext(Pioneer if Pioneer.is_pioneering else null, Text[Pioneer.language][5], HudPosition.TOP, 0, Color.GREEN, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         hudHeader(localPlayer if Pioneer.is_pioneering else null, "{0}: {1}".format(Text[localPlayer.language][6], Pioneer), HudPosition.RIGHT, -0.9, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.ALWAYS)
         progressBarHud(localPlayer if Pioneer.is_pioneering and getNumberOfPlayers(Team.ALL) > 1 else null, PioneerTime / Time * 100, Text[localPlayer.language][7], HudPosition.RIGHT, -0.8, Color.WHITE, Color.WHITE, ProgressHudReeval.VISIBILITY_AND_VALUES, SpecVisibility.ALWAYS)
         createEffect(Pioneer if PioneerCancelTimer else null, Effect.RING, Color.RED, PioneerPosition, CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
         hudSubtext(Pioneer if PioneerCancelTimer else null, "{0}: {1} - {2}".format(Text[Pioneer.language][8], buttonString(Button.PRIMARY_FIRE), 
                                                             "{0}: {1} {2}".format(Text[Pioneer.language][9], buttonString(Button.SECONDARY_FIRE), ceil(PioneerCancelTimer))), HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.NEVER)
     # hudSubheader(localPlayer, "v 1.0.0", HudPosition.LEFT, -2, Color.WHITE, HudReeval.NONE, SpecVisibility.DEFAULT)
-    hudSubheader(localPlayer, "beta v 0.2.0", HudPosition.LEFT, -2, Color.WHITE, HudReeval.NONE, SpecVisibility.DEFAULT)
-    hudSubtext(localPlayer, Text[localPlayer.language][10], HudPosition.LEFT, -1, Color.BLUE, HudReeval.STRING, SpecVisibility.DEFAULT)
+    hudSubheader(localPlayer, "beta v 0.2.0", HudPosition.LEFT, -2, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    hudSubtext(localPlayer, Text[localPlayer.language][10], HudPosition.LEFT, -1, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(localPlayer, ["\n\nreset: {0}\nspectate: hold {1}\n{2}".format(buttonString(Button.RELOAD), buttonString(Button.INTERACT),
                             "move checkpoint: {0} + {1} / {2}".format(buttonString(Button.CROUCH), buttonString(Button.PRIMARY_FIRE),
                             "{0}\n{1}".format(buttonString(Button.SECONDARY_FIRE),
-                            "invincible: {0} + {1}\n{2}".format(buttonString(Button.MELEE), buttonString(Button.ABILITY_2),
+                            "invincible: {0} + {1}\n{2}".format(buttonString(Button.MELEE), buttonString(Button.RELOAD),
                             "invisible: {0} + {1}\n{2}".format(buttonString(Button.CROUCH), buttonString(Button.MELEE),
                             "restart: {0} + {1} + {2}".format(buttonString(Button.CROUCH), buttonString(Button.ABILITY_1),
-                            "{0}\ninspector save: {1} + {2}".format(buttonString(Button.ABILITY_2), buttonString(Button.MELEE), buttonString(Button.RELOAD)) if localPlayer == hostPlayer else buttonString(Button.ABILITY_2))))))),
+                            "{0}\ninspector save: {1} + {2}".format(buttonString(Button.ABILITY_2), buttonString(Button.MELEE), buttonString(Button.ABILITY_2)) if localPlayer == hostPlayer else buttonString(Button.ABILITY_2))))))),
                             "\n\n제자리: {0}\n관전: {1}꾹\n{2}".format(buttonString(Button.RELOAD), buttonString(Button.INTERACT),
                             "단계 이동: {0} + {1} / {2}".format(buttonString(Button.CROUCH), buttonString(Button.PRIMARY_FIRE),
                             "{0}\n{1}".format(buttonString(Button.SECONDARY_FIRE),
-                            "연습모드: {0} + {1}\n{2}".format(buttonString(Button.MELEE), buttonString(Button.ABILITY_2),
+                            "연습모드: {0} + {1}\n{2}".format(buttonString(Button.MELEE), buttonString(Button.RELOAD),
                             "투명화: {0} + {1}\n{2}".format(buttonString(Button.CROUCH), buttonString(Button.MELEE),
                             "초기화: {0} + {1} + {2}".format(buttonString(Button.CROUCH), buttonString(Button.ABILITY_1),
-                            "{0}\n개척 저장: {1} + {2}".format(buttonString(Button.ABILITY_2), buttonString(Button.MELEE), buttonString(Button.RELOAD)) if localPlayer == hostPlayer else buttonString(Button.ABILITY_2)))))))][localPlayer.language], HudPosition.LEFT, 1, Color.WHITE, HudReeval.STRING, SpecVisibility.DEFAULT)
-    hudSubheader(localPlayer, "{0}{1}{2}".format(Text[localPlayer.language][11], 270 - floor(getTotalTimeElapsed()/60), Text[localPlayer.language][12]), HudPosition.RIGHT, -2, Color.BLUE, HudReeval.STRING, SpecVisibility.DEFAULT)
-    hudSubheader(localPlayer, '\n\nplayr list', HudPosition.RIGHT, -0.1, Color.BLUE, HudReeval.NONE, SpecVisibility.ALWAYS)
+                            "{0}\n개척 저장: {1} + {2}".format(buttonString(Button.ABILITY_2), buttonString(Button.MELEE), buttonString(Button.ABILITY_2)) if localPlayer == hostPlayer else buttonString(Button.ABILITY_2)))))))][localPlayer.language], HudPosition.LEFT, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubheader(localPlayer, "{0}{1}{2}".format(Text[localPlayer.language][11], 270 - floor(getTotalTimeElapsed()/60), Text[localPlayer.language][12]), HudPosition.RIGHT, -2, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubheader(localPlayer, '\n\nplayr list', HudPosition.RIGHT, -0.1, Color.BLUE, HudReeval.VISIBILITY, SpecVisibility.ALWAYS)
     chase(PioneerCancelTimer, 0, rate=1, ChaseReeval.NONE)
 
 
@@ -251,7 +251,7 @@ rule "Player Joined":
     createInWorldText(eventPlayer if CheckPoint[eventPlayer.check_point + 1] else null, "{0}{1}".format(Text[localPlayer.language][13], PioneerArr[eventPlayer.check_point+1]), CheckPoint[eventPlayer.check_point+1], 1.5, Clip.NONE, WorldTextReeval.VISIBILITY_POSITION_AND_STRING, Color.GREEN, SpecVisibility.DEFAULT)
     hudSubtext(eventPlayer, "【{0} {1} | {2}".format(abilityIconString(Hero.GENJI, Button.ABILITY_1), abs(AbilityArr[eventPlayer.check_point+1]-eventPlayer.ability), "{0} {1}】   【{2}".format(abilityIconString(Hero.GENJI, Button.ULTIMATE), abs(UltimateArr[eventPlayer.check_point+1]-eventPlayer.ultimate), "{0} / {1}】{2}".format(eventPlayer.check_point, len(CheckPoint)-1, "   【{0} : {1}】".format(floor(eventPlayer.time/60), floor(eventPlayer.time%60)) if Finished else ''))), HudPosition.TOP, -2, Color.GREEN, HudReeval.STRING, SpecVisibility.DEFAULT)
     hudSubtext(eventPlayer, "{0} - {1}".format(Text[localPlayer.language][14] if eventPlayer.bhop else "        ", "        " if eventPlayer.climb else "{0}{1}".format(Text[localPlayer.language][15], "({0})".format(eventPlayer.climb_num) if eventPlayer.climb_num else "")), HudPosition.TOP, -1, Color.WHITE, HudReeval.STRING, SpecVisibility.DEFAULT)
-    hudSubtext(eventPlayer if eventPlayer.is_invincible else null, Text[localPlayer.language][16], HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    hudSubtext(eventPlayer if eventPlayer.is_invincible else null, Text[localPlayer.language][16], HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), "{0} {1}".format(eventPlayer, eventPlayer.arrived_check_point), HudPosition.RIGHT, (sorted(getAllPlayers(), lambda player: -1 * player.arrived_check_point)).index(eventPlayer), Color.WHITE, HudReeval.VISIBILITY_SORT_ORDER_AND_STRING, SpecVisibility.DEFAULT)
     createIcon(eventPlayer if CheckPoint[eventPlayer.check_point+1] and not eventPlayer.isInViewAngle(CheckPoint[eventPlayer.check_point+1], 60) else null, CheckPoint[eventPlayer.check_point+1], Icon.FLAG, IconReeval.VISIBILITY_AND_POSITION, Color.GREEN, true)
     if Finished:
@@ -424,7 +424,8 @@ rule "Arrive":
     @Condition distance(eventPlayer, CheckPoint[eventPlayer.check_point + 1]) < CheckPointSize
     
     eventPlayer.check_point+=1
-    playEffect(getAllPlayers(), DynamicEffect.RING_EXPLOSION, Color.GREEN, eventPlayer, 10)
+    playEffect(eventPlayer, DynamicEffect.RING_EXPLOSION_SOUND, Color.WHITE, eventPlayer, 100)
+    playEffect(getAllPlayers(), DynamicEffect.RING_EXPLOSION, Color.GREEN, CheckPoint[eventPlayer.check_point] + vect(0, 1.5, 0), 4)
     if eventPlayer.check_point == len(CheckPoint)-1 and Finished == false:
         if (eventPlayer != Pioneer and not Pioneer.is_pioneering) or getNumberOfPlayers(Team.ALL) == 1:
             Pioneer = 0
@@ -489,6 +490,7 @@ rule "Restart":
 rule "Reset":
     @Event eachPlayer
     @Condition eventPlayer.isHoldingButton(Button.RELOAD)
+    @Condition eventPlayer.isHoldingButton(Button.MELEE) == false
     @Condition CheckPoint
 
     if eventPlayer.is_pioneering and PioneerCancelTimer:
@@ -553,7 +555,7 @@ rule "Move CheckPoint":
 
 rule "Invincible Mode":
     @Event eachPlayer
-    @Condition eventPlayer.isHoldingButton(Button.ABILITY_2)
+    @Condition eventPlayer.isHoldingButton(Button.RELOAD)
     @Condition eventPlayer.isHoldingButton(Button.MELEE)
     @Condition CheckPoint
 
@@ -573,7 +575,7 @@ rule "Ultimate Charge":
     @Event eachPlayer
     @Condition eventPlayer.getUltCharge() < 100
 
-    wait(0.5)
+    wait(4)
     eventPlayer.setUltCharge(100)
         
 
@@ -661,7 +663,7 @@ rule "Dva":
 
 rule "Save Inspector":
     @Condition hostPlayer.isHoldingButton(Button.MELEE)
-    @Condition hostPlayer.isHoldingButton(Button.RELOAD)
+    @Condition hostPlayer.isHoldingButton(Button.ABILITY_2)
     @Condition hostPlayer.isStanding()
 
     hostPlayer.save_temp = []
