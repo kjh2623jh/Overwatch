@@ -7,7 +7,7 @@ settings {
         # <FG30FF0Bf> : 초록색
         # <FGFF0000f> : 빨간색
         # <FGFFFFFFf> : 기본 글자 색
-        "description": "Created by: <FG30FF0Bf>훈제김치<FGFFFFFFf>\nCode: <FG30FF0Bf>95969\nhttps://discord.gg/dyGvBbBgxV<FGFFFFFFf>\nv 0.1"
+        "description": "Created by: <FG30FF0Bf>훈제김치<FGFFFFFFf>\nCode: <FG30FF0Bf>95969\nhttps://discord.gg/dyGvBbBgxV<FGFFFFFFf>\nv 0.2.0"
     },
     "lobby": {
         "returnToLobby": "never",
@@ -179,12 +179,12 @@ rule "Init":
         PioneerHud.append(getLastCreatedText())
         hudSubtext(Pioneer if Pioneer.is_pioneering else null, Text[Pioneer.language][5], HudPosition.TOP, 0, Color.GREEN, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         hudHeader(localPlayer if Pioneer.is_pioneering else null, "{0}: {1}".format(Text[localPlayer.language][6], Pioneer), HudPosition.RIGHT, -0.9, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.ALWAYS)
-        progressBarHud(localPlayer if Pioneer.is_pioneering and getNumberOfPlayers(Team.ALL) > 1 else null, PioneerTime / Time * 100, Text[localPlayer.language][7], HudPosition.RIGHT, -0.8, Color.WHITE, Color.WHITE, ProgressHudReeval.VISIBILITY_AND_VALUES, SpecVisibility.ALWAYS)
+        progressBarHud(localPlayer if Pioneer.is_pioneering and getNumberOfPlayers(Team.ALL) > 1 else null, PioneerTime / Time * 100, Text[localPlayer.language][7], HudPosition.RIGHT, -0.8, Color.GREEN, Color.WHITE, ProgressHudReeval.VISIBILITY_AND_VALUES, SpecVisibility.ALWAYS)
         createEffect(Pioneer if PioneerCancelTimer else null, Effect.RING, Color.RED, PioneerPosition, CheckPointSize, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
         hudSubtext(Pioneer if PioneerCancelTimer else null, "{0}: {1} - {2}".format(Text[Pioneer.language][8], buttonString(Button.PRIMARY_FIRE), 
                                                             "{0}: {1} {2}".format(Text[Pioneer.language][9], buttonString(Button.SECONDARY_FIRE), ceil(PioneerCancelTimer))), HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.NEVER)
     # hudSubheader(localPlayer, "v 1.0.0", HudPosition.LEFT, -2, Color.WHITE, HudReeval.NONE, SpecVisibility.DEFAULT)
-    hudSubheader(localPlayer, "beta v 0.2.0", HudPosition.LEFT, -2, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    hudSubheader(localPlayer, "v 0.2.0", HudPosition.LEFT, -2, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
     hudSubtext(localPlayer, Text[localPlayer.language][10], HudPosition.LEFT, -1, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(localPlayer, ["\n\nreset: {0}\nspectate: hold {1}\n{2}".format(buttonString(Button.RELOAD), buttonString(Button.INTERACT),
                             "move checkpoint: {0} + {1} / {2}".format(buttonString(Button.CROUCH), buttonString(Button.PRIMARY_FIRE),
@@ -242,7 +242,7 @@ rule "Player Joined":
         CheckPointList.append(eventPlayer.check_point)
         eventPlayer.player_index = PlayerList.index(eventPlayer.name)
     if CheckPoint == false:
-        if eventPlayer == Pioneer:
+        if eventPlayer == Pioneer: ################################################################################################################################################################
             eventPlayer.is_last_check_point = true
         invincibleMode()
     createEffect(eventPlayer, Effect.RING, Color.WHITE, CheckPoint[eventPlayer.check_point], CheckPointSize, EffectReeval.POSITION_AND_RADIUS)
@@ -301,7 +301,7 @@ def abilityReset():
         if UltimateArr[eventPlayer.check_point+1]==0:
             eventPlayer.setUltEnabled(false)
     waitUntil(not eventPlayer.isUsingAbility1(), 3)
-    if eventPlayer.isUsingUltimate():
+    if eventPlayer.isUsingUltimate() and eventPlayer.check_point<len(CheckPoint):
         kill(eventPlayer, null)
         eventPlayer.resurrect()
     eventPlayer.ability = 0
@@ -405,11 +405,12 @@ rule "Pioneer Time":
 rule "Pioneered":
     @Event eachPlayer
     @Condition eventPlayer.is_last_check_point
-    @Condition CheckPoint[eventPlayer.check_point + 1] == true
+    @Condition CheckPoint[eventPlayer.arrived_check_point + 1] == true
     @Condition eventPlayer != Pioneer
 
-    toCheckPoint()
     eventPlayer.is_last_check_point = false
+    if eventPlayer.check_point == eventPlayer.arrived_check_point:
+        toCheckPoint()
     if eventPlayer.is_invincible:
         invincibleMode()
     
@@ -534,6 +535,7 @@ rule "Ultimate":
 
 rule "Move CheckPoint":
     @Event eachPlayer
+    @Condition CheckPoint
     @Condition eventPlayer.isHoldingButton(Button.CROUCH)
     @Condition eventPlayer.isHoldingButton(Button.PRIMARY_FIRE) or eventPlayer.isHoldingButton(Button.SECONDARY_FIRE)
     @Condition eventPlayer.isOnGround() or eventPlayer.is_invincible
@@ -575,8 +577,11 @@ rule "Ultimate Charge":
     @Event eachPlayer
     @Condition eventPlayer.getUltCharge() < 100
 
-    wait(4)
+    eventPlayer.disallowButton(Button.ULTIMATE)
+    wait(0.5)
     eventPlayer.setUltCharge(100)
+    wait(3.5)
+    eventPlayer.allowButton(Button.ULTIMATE)
         
 
 rule "Spectate":
@@ -633,7 +638,7 @@ rule "Dva":
     wait(2)
     createDummy(Hero.DVA, Team.1, -1, vect(0, 10, 0), vect(0, 0, 0))
     Dva = getLastCreatedEntity()
-    Dva.dva_position_arr = [[0, Map.NEPAL, Map.NUMBANI, Map.DORADO, Map.LIJIANG_TOWER, Map.LIJIANG_TOWER_LNY, Map.BUSAN, Map.BLIZZ_WORLD, Map.BLIZZ_WORLD_WINTER, Map.OASIS, Map.ILIOS, Map.PARIS], [vect(-50, 15, 0), vect(-195, -90, 0)], [vect(100, -1, 25)], [vect(90, 10, -1)], [vect(0, 270, 280), vect(0, 95, 150), vect(0, 0, -35)], [vect(0, 270, 280), vect(0, 95, 150), vect(0, 0, -35)], [vect(50, 15, -115), vect(-330, 15, 140), vect(215, 15, 225)], [vect(-45, 5, 95)], [vect(-45, 5, 95)], [vect(-190, 15, 0), vect(135, 10, -240), vect(145, 10, 250)], [vect(30, 60, -155), vect(-200, 1, 10), vect(320, -20, -35)] ,[vect(-45, 15, -10)]]
+    Dva.dva_position_arr = [[0, Map.NEPAL, Map.NUMBANI, Map.DORADO, Map.LIJIANG_TOWER, Map.LIJIANG_TOWER_LNY, Map.BUSAN, Map.BLIZZ_WORLD, Map.BLIZZ_WORLD_WINTER, Map.OASIS, Map.ILIOS, Map.PARIS, Map.PARAISO, Map.NEW_QUEEN_STREET], [vect(-50, 15, 0), vect(-195, -90, 0)], [vect(100, -1, 25)], [vect(90, 10, -1)], [vect(0, 270, 280), vect(0, 95, 150), vect(0, 0, -35)], [vect(0, 270, 280), vect(0, 95, 150), vect(0, 0, -35)], [vect(50, 15, -115), vect(-330, 15, 140), vect(215, 15, 225)], [vect(-45, 5, 95)], [vect(-45, 5, 95)], [vect(-190, 15, 0), vect(135, 10, -240), vect(145, 10, 250)], [vect(30, 60, -155), vect(-200, 1, 10), vect(320, -20, -35)] ,[vect(-45, 15, -10)], [vect(0, 11, -60)], [vect(-0.5, 0, 15.5)]]
     Dva.dva_index = Dva.dva_position_arr[0].index(getCurrentMap())
     wait(1)
     Dva.setInvisibility(Invis.ALL)
@@ -774,3 +779,12 @@ rule "Ground":
     eventPlayer.bhop = false
     eventPlayer.climb_num = 0
     eventPlayer.check = 0
+
+rule "a":
+    @Event eachPlayer
+    @Condition eventPlayer.isHoldingButton(Button.INTERACT)
+
+    eventPlayer.teleport(vect(0, 0, 0))\
+
+rule "b":
+    hudHeader(hostPlayer, hostPlayer.getPosition(), HudPosition.RIGHT, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
