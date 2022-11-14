@@ -7,7 +7,7 @@ settings {
         # <FG30FF0Bf> : 초록색
         # <FGFF0000f> : 빨간색
         # <FGFFFFFFf> : 기본 글자 색
-        "description": "Created by: <FG30FF0Bf>훈제김치<FGFFFFFFf>\nCode: <FG30FF0Bf>95969\nhttps://discord.gg/dyGvBbBgxV<FGFFFFFFf>\nv 0.2.1"
+        "description": "Created by: <FG30FF0Bf>훈제김치<FGFFFFFFf>\nCode: <FG30FF0Bf>95969\nhttps://discord.gg/dyGvBbBgxV<FGFFFFFFf>\nv 0.2.2"
     },
     "lobby": {
         "returnToLobby": "never",
@@ -184,7 +184,7 @@ rule "Init":
         hudSubtext(Pioneer if PioneerCancelTimer else null, "{0}: {1} - {2}".format(Text[Pioneer.language][8], buttonString(Button.PRIMARY_FIRE), 
                                                             "{0}: {1} {2}".format(Text[Pioneer.language][9], buttonString(Button.SECONDARY_FIRE), ceil(PioneerCancelTimer))), HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.NEVER)
     # hudSubheader(localPlayer, "v 1.0.0", HudPosition.LEFT, -2, Color.WHITE, HudReeval.NONE, SpecVisibility.DEFAULT)
-    hudSubheader(localPlayer, "v 0.2.0", HudPosition.LEFT, -2, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    hudSubheader(localPlayer, "v 0.2.2", HudPosition.LEFT, -2, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
     hudSubtext(localPlayer, Text[localPlayer.language][10], HudPosition.LEFT, -1, Color.BLUE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(localPlayer, ["\n\nreset: {0}\nspectate: hold {1}\n{2}".format(buttonString(Button.RELOAD), buttonString(Button.INTERACT),
                             "move checkpoint: {0} + {1} / {2}".format(buttonString(Button.CROUCH), buttonString(Button.PRIMARY_FIRE),
