@@ -7,7 +7,7 @@ settings {
         # <FG30FF0Bf> : 초록색
         # <FGFF0000f> : 빨간색
         # <FGFFFFFFf> : 기본 글자 색
-        "description": "Created by: <FG30FF0Bf>훈제김치<FGFFFFFFf>\nCode: <FG30FF0Bf>95969\nhttps://discord.gg/dyGvBbBgxV<FGFFFFFFf>\nv 0.2.0"
+        "description": "Created by: <FG30FF0Bf>훈제김치<FGFFFFFFf>\nCode: <FG30FF0Bf>95969\nhttps://discord.gg/dyGvBbBgxV<FGFFFFFFf>\nv 0.2.1"
     },
     "lobby": {
         "returnToLobby": "never",
@@ -779,12 +779,3 @@ rule "Ground":
     eventPlayer.bhop = false
     eventPlayer.climb_num = 0
     eventPlayer.check = 0
-
-rule "a":
-    @Event eachPlayer
-    @Condition eventPlayer.isHoldingButton(Button.INTERACT)
-
-    eventPlayer.teleport(vect(0, 0, 0))\
-
-rule "b":
-    hudHeader(hostPlayer, hostPlayer.getPosition(), HudPosition.RIGHT, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
