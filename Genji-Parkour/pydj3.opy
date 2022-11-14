@@ -1,7 +1,7 @@
 settings {
     "main": {
         "modeName": "겐지 개척 파쿠르",
-        "description": "modified by 훈제김치\ncode : PYDJ3\nhttps://discord.gg/dyGvBbBgxV\n22.8.23"
+        "description": "modified by 훈제김치\ncode : PYDJ3\nhttps://discord.gg/dyGvBbBgxV\n22.11.15"
     },
     "lobby": {
         "enableMatchVoiceChat": true,
@@ -1196,7 +1196,7 @@ def genjiparkour():
     
     #↓맵 코드를 적어주세요↓
     MapCode = ""
-    hudSubheader(localPlayer, "8.23", HudPosition.LEFT, -99, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    hudSubheader(localPlayer, "11.15", HudPosition.LEFT, -99, Color.WHITE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
     if MapCode == "":
         goto lbl_0
     hudSubtext(localPlayer, "맵 코드 : {0}".format(MapCode), HudPosition.LEFT, -14, Color.AQUA, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
