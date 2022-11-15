@@ -1,7 +1,7 @@
 settings {
     "main": {
         "modeName": "겐지 개척 파쿠르",
-        "description": "modified by 훈제김치\ncode : PYDJ3\nhttps://discord.gg/dyGvBbBgxV\n22.11.15"
+        "description": "modified by 훈제김치\ncode : PYDJ3\nhttps://discord.gg/dyGvBbBgxV\n22.11.15\nnew genjiparkour workshop code: 95969"
     },
     "lobby": {
         "enableMatchVoiceChat": true,
@@ -144,7 +144,7 @@ rule "기본변수설정":
     F = createWorkshopSetting(int[1:100], "기본설정(Setting)", "경쟁모드에서의 단계수(last check point in competition mode)", 30, 0)
     N = createWorkshopSetting(float[0.1:3], "기본설정(Setting)", "개척지 크기(size of check point)", 2, 0)
     if "{0}".format(Hero.GENJI) == "겐지":
-        AH = [["Recommended Workshop of the Week\r\nOthello/reversi(code: eaavv)\r\nOthello! now play!\r\n\r\n\r\n\r\n\r\n\r\n\r\n"], ["겐지 파쿠르 디스코드 있습니다! 유튜브 통해 들어오세요\r\n유튜브 : nemi (겐지파쿠르도 같이 검색하면 바로 나옵니다,)\r\n\r\n\r\n\r\n\r\n\r\n"], ["Recommended Workshop of the Week\r\nOthello/reversi(code: eaavv)\r\nOthello! now play!\r\n\r\n\r\n\r\n\r\n\r\n\r\n"], ["Recommended Workshop of the Week\r\nOthello/reversi(code: eaavv)\r\nOthello! now play!\r\n\r\n\r\n\r\n\r\n\r\n\r\n"]]
+        AH = [["Recommended Workshop of the Week\r\nOthello/reversi(code: eaavv)\r\nOthello! now play!\r\n\r\n\r\n\r\n\r\n\r\n\r\n"], ["유튜브 : (겐지파쿠르) nemi\r\n유튜브에 디스코드 링크도 있습니다\r\n겐지파쿠르 워크샵 새로 만들었습니다\r\n코드: 95969\r\n\r\n\r\n\r\n\r\n\r\n"], ["Recommended Workshop of the Week\r\nOthello/reversi(code: eaavv)\r\nOthello! now play!\r\n\r\n\r\n\r\n\r\n\r\n\r\n"], ["Recommended Workshop of the Week\r\nOthello/reversi(code: eaavv)\r\nOthello! now play!\r\n\r\n\r\n\r\n\r\n\r\n\r\n"]]
     AB = []
     AC = []
     AD = []
