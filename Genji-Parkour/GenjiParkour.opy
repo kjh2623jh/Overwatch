@@ -9,8 +9,6 @@
 #!include "Init.opy"
 
 
-
-
 rule "Create First Checkpoint":
     @Condition CheckPoint == false
     @Condition Pioneer.isHoldingButton(Button.RELOAD)
@@ -52,12 +50,12 @@ def abilityReset():
     eventPlayer.allowButton(Button.ULTIMATE)
     eventPlayer.setUltCharge(100)
     if CheckPoint[eventPlayer.check_point+1] and eventPlayer.is_pioneering == false and eventPlayer.is_invincible == false:
-        if AbilityArr[eventPlayer.check_point+1]==0:
+        if AbilityArr[eventPlayer.check_point+1] == 0:
             eventPlayer.setAbility1Enabled(false)
-        if UltimateArr[eventPlayer.check_point+1]==0:
+        if UltimateArr[eventPlayer.check_point+1] == 0:
             eventPlayer.setUltEnabled(false)
     waitUntil(not eventPlayer.isUsingAbility1(), 3)
-    if eventPlayer.isUsingUltimate() and eventPlayer.check_point<len(CheckPoint):
+    if eventPlayer.isUsingUltimate() and eventPlayer.check_point < len(CheckPoint):
         kill(eventPlayer, null)
         eventPlayer.resurrect()
     eventPlayer.ability = 0
