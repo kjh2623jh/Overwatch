@@ -15,7 +15,7 @@ rule "Create First Checkpoint":
     @Condition Pioneer.isOnGround() == true
 
     if Pioneer.isInSpawnRoom():
-        smallMessage(Pioneer, "기지 밖에서 시작해주세요")
+        smallMessage(Pioneer, Text[localPlayer.language][22])
         return
     destroyHudText(PioneerHud[0])
     destroyHudText(PioneerHud[1])
@@ -339,6 +339,8 @@ rule "Ultimate Charge":
     eventPlayer.disallowButton(Button.ULTIMATE)
     wait(0.5)
     eventPlayer.setUltCharge(100)
+    wait(0)
+    if RULE_CONDITION: goto RULE_START
     wait(3.5)
     eventPlayer.allowButton(Button.ULTIMATE)
         
@@ -521,7 +523,7 @@ rule "Create Bhop":
     @Condition eventPlayer.isOnGround() == false
     
     eventPlayer.bhop = true
-    smallMessage(eventPlayer, "앉콩")
+    smallMessage(eventPlayer, Text[localPlayer.language][23])
 
 
 rule "Use Bhop":
