@@ -28,65 +28,11 @@ rule "Create First Checkpoint":
     UltimateArr = [0]
 
 
-def toCheckPoint():
-    @Name "To Checkpoint"
-
-    waitUntil(not eventPlayer.isUsingAbility1(), 3)
-    eventPlayer.startForcingPosition(CheckPoint[eventPlayer.check_point], false)
-    abilityReset()
-    if eventPlayer.arrived_check_point == 0:
-        eventPlayer.time = 0
-    wait(0.1)
-    eventPlayer.stopForcingPosition()
-
-
-def abilityReset():
-    @Name "Ability Reset"
-
-    waitUntil(not eventPlayer.isUsingAbility1(), 3)
-    eventPlayer.setAbilityCooldown(Button.ABILITY_1, 0)
-    eventPlayer.setAbility1Enabled(true)
-    eventPlayer.setUltEnabled(true)
-    eventPlayer.allowButton(Button.ULTIMATE)
-    eventPlayer.setUltCharge(100)
-    if CheckPoint[eventPlayer.check_point+1] and eventPlayer.is_pioneering == false and eventPlayer.is_invincible == false:
-        if AbilityArr[eventPlayer.check_point+1] == 0:
-            eventPlayer.setAbility1Enabled(false)
-        if UltimateArr[eventPlayer.check_point+1] == 0:
-            eventPlayer.setUltEnabled(false)
-    waitUntil(not eventPlayer.isUsingAbility1(), 3)
-    if eventPlayer.isUsingUltimate() and eventPlayer.check_point < len(CheckPoint):
-        kill(eventPlayer, null)
-        eventPlayer.resurrect()
-    eventPlayer.ability = 0
-    eventPlayer.ultimate = 0
-
-        
-def invincibleMode():
-    @Name "InvincibleMode"
-
-    if eventPlayer.is_invincible:
-        eventPlayer.is_float = true
-        eventPlayer.is_invincible = false
-        toCheckPoint()
-        eventPlayer.is_float = false
-        if Finished and eventPlayer.check_point < len(CheckPoint)-1:
-            chase(eventPlayer.time, 99999999, rate=1, ChaseReeval.NONE)
-    else:
-        eventPlayer.is_invincible = true
-        eventPlayer.setAbility1Enabled(true)
-        eventPlayer.setUltEnabled(true)
-        eventPlayer.setUltCharge(100)
-        eventPlayer.setAbilityCooldown(Button.ABILITY_1, 0)
-        stopChasingVariable(eventPlayer.time)
-        smallMessage(eventPlayer, Text[localPlayer.language][16])
-
-
 rule "Die":
     @Event eachPlayer
     @Condition eventPlayer.isOnGround()
     @Condition eventPlayer.is_invincible == false
-    @Condition distance(eventPlayer, CheckPoint[eventPlayer.check_point]) > CheckPointSize
+    @Condition distance(eventPlayer, CheckPoint[eventPlayer.check_point]) > CheckPointSize + 0.3
 
     if (CheckPoint[eventPlayer.check_point + 1] and distance(eventPlayer, CheckPoint[eventPlayer.check_point+1]) > CheckPointSize) \
         or (eventPlayer.is_pioneering and distance(eventPlayer, CheckPoint[eventPlayer.check_point]) <= PioneerMinDistans):
@@ -216,7 +162,7 @@ rule "Finish":
     stopChasingVariable(eventPlayer.time)
     if eventPlayer.time < TopTimeList[TopPlayerList.index(eventPlayer.name)]:
         TopTimeList[TopPlayerList.index(eventPlayer.name)] = eventPlayer.time
-    else:
+    elif eventPlayer.name not in TopPlayerList:
         TopPlayerList.append(eventPlayer.name)
         TopTimeList.append(eventPlayer.time)
     Top3List = sorted(TopTimeList)
@@ -225,10 +171,10 @@ rule "Finish":
 
 rule "Restart":
     @Event eachPlayer
-    @Condition Finished
     @Condition eventPlayer.isHoldingButton(Button.CROUCH)
     @Condition eventPlayer.isHoldingButton(Button.ABILITY_1)
     @Condition eventPlayer.isHoldingButton(Button.ABILITY_2)
+    @Condition Finished
 
     eventPlayer.is_float = true
     eventPlayer.check_point = 0
@@ -402,7 +348,7 @@ rule "Dva":
     wait(2)
     createDummy(Hero.DVA, Team.1, -1, vect(0, 10, 0), vect(0, 0, 0))
     Dva = getLastCreatedEntity()
-    Dva.dva_position_arr = [[0, Map.NEPAL, Map.NUMBANI, Map.DORADO, Map.LIJIANG_TOWER, Map.LIJIANG_TOWER_LNY, Map.BUSAN, Map.BLIZZ_WORLD, Map.BLIZZ_WORLD_WINTER, Map.OASIS, Map.ILIOS, Map.PARIS, Map.PARAISO, Map.NEW_QUEEN_STREET], [vect(-50, 15, 0), vect(-195, -90, 0)], [vect(100, -1, 25)], [vect(90, 10, -1)], [vect(0, 270, 280), vect(0, 95, 150), vect(0, 0, -35)], [vect(0, 270, 280), vect(0, 95, 150), vect(0, 0, -35)], [vect(50, 15, -115), vect(-330, 15, 140), vect(215, 15, 225)], [vect(-45, 5, 95)], [vect(-45, 5, 95)], [vect(-190, 15, 0), vect(135, 10, -240), vect(145, 10, 250)], [vect(30, 60, -155), vect(-200, 1, 10), vect(320, -20, -35)] ,[vect(-45, 15, -10)], [vect(0, 11, -60)], [vect(-0.5, 0, 15.5)]]
+    Dva.dva_position_arr = [[0, Map.NEPAL, Map.DORADO, Map.LIJIANG_TOWER, Map.LIJIANG_TOWER_LNY, Map.BUSAN, Map.BLIZZ_WORLD, Map.BLIZZ_WORLD_WINTER, Map.OASIS, Map.ILIOS, Map.PARIS, Map.PARAISO, Map.NEW_QUEEN_STREET], [vect(-50, 15, 0), vect(-195, -90, 0)], [vect(90, 10, -1)], [vect(0, 270, 280), vect(0, 95, 150), vect(0, 0, -35)], [vect(0, 270, 280), vect(0, 95, 150), vect(0, 0, -35)], [vect(50, 15, -115), vect(-330, 15, 140), vect(215, 15, 225)], [vect(-45, 5, 95)], [vect(-45, 5, 95)], [vect(-190, 15, 0), vect(135, 10, -240), vect(145, 10, 250)], [vect(30, 60, -155), vect(-200, 1, 10), vect(320, -20, -35)] ,[vect(-45, 15, -10)], [vect(0, 11, -60)], [vect(-0.5, 0, 15.5)]]
     Dva.dva_index = Dva.dva_position_arr[0].index(getCurrentMap())
     wait(1)
     Dva.setInvisibility(Invis.ALL)

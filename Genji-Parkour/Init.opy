@@ -19,6 +19,60 @@ def save():
     */
 
 
+def toCheckPoint():
+    @Name "To Checkpoint"
+
+    waitUntil(not eventPlayer.isUsingAbility1(), 3)
+    eventPlayer.startForcingPosition(CheckPoint[eventPlayer.check_point], false)
+    abilityReset()
+    if eventPlayer.arrived_check_point == 0:
+        eventPlayer.time = 0
+    wait(0.1)
+    eventPlayer.stopForcingPosition()
+
+
+def abilityReset():
+    @Name "Ability Reset"
+
+    waitUntil(not eventPlayer.isUsingAbility1(), 3)
+    eventPlayer.setAbilityCooldown(Button.ABILITY_1, 0)
+    eventPlayer.setAbility1Enabled(true)
+    eventPlayer.setUltEnabled(true)
+    eventPlayer.allowButton(Button.ULTIMATE)
+    eventPlayer.setUltCharge(100)
+    if CheckPoint[eventPlayer.check_point+1] and eventPlayer.is_pioneering == false and eventPlayer.is_invincible == false:
+        if AbilityArr[eventPlayer.check_point+1] == 0:
+            eventPlayer.setAbility1Enabled(false)
+        if UltimateArr[eventPlayer.check_point+1] == 0:
+            eventPlayer.setUltEnabled(false)
+    waitUntil(not eventPlayer.isUsingAbility1(), 3)
+    if eventPlayer.isUsingUltimate() and eventPlayer.check_point < len(CheckPoint):
+        kill(eventPlayer, null)
+        eventPlayer.resurrect()
+    eventPlayer.ability = 0
+    eventPlayer.ultimate = 0
+
+        
+def invincibleMode():
+    @Name "InvincibleMode"
+
+    if eventPlayer.is_invincible:
+        eventPlayer.is_float = true
+        eventPlayer.is_invincible = false
+        toCheckPoint()
+        eventPlayer.is_float = false
+        if Finished and eventPlayer.check_point < len(CheckPoint)-1:
+            chase(eventPlayer.time, 99999999, rate=1, ChaseReeval.NONE)
+    else:
+        eventPlayer.is_invincible = true
+        eventPlayer.setAbility1Enabled(true)
+        eventPlayer.setUltEnabled(true)
+        eventPlayer.setUltCharge(100)
+        eventPlayer.setAbilityCooldown(Button.ABILITY_1, 0)
+        stopChasingVariable(eventPlayer.time)
+        smallMessage(eventPlayer, Text[localPlayer.language][16])
+
+
 rule "Init":
     disableInspector()
     disableScoring()
