@@ -3,8 +3,6 @@
 #!include "Settings.opy"
 #!include "Definitions.opy"
 
-#!disableMapDetectionFix
-
 
 #!include "Init.opy"
 
