@@ -1,4 +1,5 @@
 # Overwatch
 
-with [OverPy](https://zezombye.github.io/overpy/demo)
-by Zezombye
+with [OverPy](https://github.com/Zezombye/overpy)
+by [Zezombye](https://github.com/Zezombye)
+[OverPy PlayGround](https://zezombye.github.io/overpy/demo)
