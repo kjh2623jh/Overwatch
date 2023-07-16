@@ -46,7 +46,6 @@
 #!define climb R
 #!define bhop S
 #!define climb_num T
-#!define check U     
 
 # ----------------SUBS------------------
 #!define save Sub0
@@ -101,7 +100,6 @@ playervar time
 playervar climb
 playervar bhop
 playervar climb_num
-playervar check
 
 #Subroutines
 subroutine save 

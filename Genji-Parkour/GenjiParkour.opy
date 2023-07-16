@@ -398,37 +398,12 @@ rule "Save Inspector":
     smallMessage(hostPlayer, Text[hostPlayer.language][21])
 
 
-rule "Jump":
-    @Event eachPlayer
-    @Condition eventPlayer.isHoldingButton(Button.JUMP) == true
-    @Condition eventPlayer.check != 2
-    
-    eventPlayer.check += 1
-
-
 rule "Bhop":
     @Event eachPlayer
     @Condition eventPlayer.isHoldingButton(Button.JUMP) == false
     @Condition eventPlayer.isInAir() == true
-    @Condition eventPlayer.check == 0
     
     eventPlayer.bhop = true
-
-
-rule "Triple Jump":
-    @Event eachPlayer
-    @Condition eventPlayer.check == 1
-    
-    wait(0.1, Wait.ABORT_WHEN_FALSE)
-    eventPlayer.check = 2
-
-
-rule "Triple Jump":
-    @Event eachPlayer
-    @Condition eventPlayer.check == 0
-    @Condition eventPlayer.isInAir() == true
-    
-    eventPlayer.check = 1
 
 
 rule "Climb":
@@ -437,7 +412,6 @@ rule "Climb":
     @Condition eventPlayer.isHoldingButton(Button.JUMP) == true
     
     eventPlayer.climb = true
-    eventPlayer.check = 2
     smallMessage(eventPlayer, Text[localPlayer.language][15])
 
 
@@ -486,4 +460,3 @@ rule "Ground":
     eventPlayer.climb = false
     eventPlayer.bhop = false
     eventPlayer.climb_num = 0
-    eventPlayer.check = 0

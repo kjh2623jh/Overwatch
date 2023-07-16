@@ -3,11 +3,11 @@
 # Settings
 settings {
     "main": {
-        "modeName": "<FG30FF0Bf>겐지 파쿠르",
+        "modeName": "겐지 파쿠르",
         # <FG30FF0Bf> : 초록색
         # <FGFF0000f> : 빨간색
         # <FGFFFFFFf> : 기본 글자 색
-        "description": "Created by: <FG30FF0Bf>훈제김치<FGFFFFFFf>\nCode: <FG30FF0Bf>95969\nhttps://discord.gg/dyGvBbBgxV<FGFFFFFFf>\nv 0.2.3.2"
+        "description": "Created by: <FG30FF0Bf>훈제김치<FGFFFFFFf>\nCode: <FG30FF0Bf>95969\nhttps://discord.gg/dyGvBbBgxV<FGFFFFFFf>\nv 0.2.4"
     },
     "lobby": {
         "returnToLobby": "never",
