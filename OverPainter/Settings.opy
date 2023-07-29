@@ -2,7 +2,7 @@
 
 settings {
     "main": {
-        "modeName": "그림 그리기",
+        "modeName": "옵치 페인터",
         "description": "제작 훈제김치\r\n코드 "
     },
     "lobby": {

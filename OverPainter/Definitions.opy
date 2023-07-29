@@ -1,21 +1,14 @@
 #!mainFile "OverPainter.opy"
 
-# ----------------GLOBAL------------------
+# ------------ Definitions ------------
 #!define Words A
+#!define Theme B
 
-# ----------------PLAYER------------------
-#!define A A
-
-# ----------------SUBS------------------
-#!define A Sub0
-
-
-#Global variables
+# ------------ Global Var --------------
 globalvar Words
 globalvar Theme
 
-#Player variables
-playervar A
+# ------------ Player Var --------------
 
-#Subroutines
-subroutine A
+
+# -------------- Subrutine --------------
