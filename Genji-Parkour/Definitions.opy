@@ -46,6 +46,7 @@
 #!define climb R
 #!define bhop S
 #!define climb_num T
+#!define bhop_check U
 
 # ----------------SUBS------------------
 #!define save Sub0
@@ -61,9 +62,9 @@ globalvar CheckPoint
 globalvar PioneerArr
 globalvar AbilityArr
 globalvar UltimateArr
-globalvar CheckPointSize 
-globalvar PioneerHud 
-globalvar Pioneer 
+globalvar CheckPointSize
+globalvar PioneerHud
+globalvar Pioneer
 globalvar PioneerMinDistans
 globalvar PlayerList
 globalvar TimeList
@@ -81,7 +82,7 @@ globalvar TopTimeList
 
 #Player variables
 playervar language
-playervar check_point 
+playervar check_point
 playervar arrived_check_point
 playervar is_pioneering
 playervar is_float
@@ -100,6 +101,7 @@ playervar time
 playervar climb
 playervar bhop
 playervar climb_num
+playervar bhop_check
 
 #Subroutines
 subroutine save 
