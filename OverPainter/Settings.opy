@@ -3,22 +3,23 @@
 settings {
     "main": {
         "modeName": "옵치 페인터",
-        "description": "제작 훈제김치\r\n코드 "
+        "description": "제작 훈제김치\r\n코드"
     },
     "lobby": {
+        "enableMatchVoiceChat": true,
         "returnToLobby": "never",
-        "allowPlayersInQueue": true,
-        "team1Slots": 12,
-        "team2Slots": 0,
-        "spectatorSlots": 3
+        "allowPlayersInQueue": true
     },
     "gamemodes": {
-        "skirmish": {
+        "ffa": {
+            "enabledMaps": [
+                "workshopChamber"
+            ],
+            "enableSelfInitiatedRespawn": false
         },
         "general": {
             "gamemodeStartTrigger": "immediately",
             "enableRandomHeroes": true,
-            "respawnTime%": 0,
             "spawnHealthPacks": "disabled",
             "enableKillFeed": false,
             "enableHeroSwitching": false,
@@ -29,15 +30,14 @@ settings {
     },
     "heroes": {
         "allTeams": {
-            "general": {
-                "ultGen%": 10,
-                "passiveUltGen%": 0,
-                "combatUltGen%": 0,
+            "zenyatta": {
+                "enableUlt": false,
                 "enablePrimaryFire": false,
-                "abilityCooldown%": 50,
+                "enableSecondaryFire": false,
+                "enableAbility2": false,
                 "enableMelee": false,
-                "movementSpeed%": 110,
-                "enableHeadshotsOnly": true
+                "enableAbility1": false,
+                "enableInfiniteAmmo": true
             },
             "enabledHeroes": [
                 "zenyatta"
@@ -45,3 +45,5 @@ settings {
         }
     }
 }
+
+#!extension playMoreEffects
