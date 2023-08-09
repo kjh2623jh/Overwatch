@@ -21,5 +21,6 @@ playervar mouse_pos
 playervar dots_number
 playervar test
 playervar num
+playervar color_hud
 
 # -------------- Subrutine --------------

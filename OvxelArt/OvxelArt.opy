@@ -14,23 +14,23 @@ rule "init":
     DotsPos = []
     Init = 0
     DotsNumberText = ""
-    DotsNumber = [1, 2, 2, 1, 2, 1, 2, 2, 1, 2, 1, 1, 2, 1, 2, 1, \
-                 2, 2, 1, 2, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2, \
-                 2, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 2, 2, 1, 2, \
-                 2, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
-                 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1, \
-                 1, 2, 2, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 2, 1, 1, \
-                 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 1, 1, 2, 2, 2, 2, \
+    DotsNumber = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
                  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
-                 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
-                 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, \
                  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
-                 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, \
-                 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, \
-                 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, \
-                 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, \
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
                  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ]
-    ColorPalette = [0, Color.RED, Color.BLUE]
+    ColorPalette = [0, Color.RED]
 
     for i in range(16):
         for j in range(16):
@@ -70,19 +70,44 @@ rule "Player Join":
                       2.5, Clip.NONE, WorldTextReeval.VISIBILITY_POSITION_STRING_AND_COLOR, Color.WHITE, SpecVisibility.DEFAULT)
     eventPlayer.mouse_pos = vect(0, 10.8, 20) + 0.1 * vect(eventPlayer.getHorizontalFacingAngle(), -1 * eventPlayer.getVerticalFacingAngle(), 0)
     eventPlayer.dots_number = []
+    eventPlayer.teleport(vect(0, 0, 19))
+    eventPlayer.color = 1
+    eventPlayer.color_hud = []
+    hudHeader(localPlayer, 1, HudPosition.LEFT, 1, ColorPalette[1], HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    eventPlayer.color_hud[1] = getLastCreatedText()
+    for i in range(2, len(ColorPalette)):
+        hudSubtext(localPlayer, i, HudPosition.LEFT, i, ColorPalette[i], HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+        eventPlayer.color_hud[i] = getLastCreatedText()
 
 
-rule "click":
+rule "Click":
     @Event eachPlayer
     @Condition Init
     @Condition eventPlayer.isHoldingButton(Button.PRIMARY_FIRE)
 
     eventPlayer.click_pos = vect(0, 10.8, 20) + 0.1 * vect(eventPlayer.getHorizontalFacingAngle(), -1 * eventPlayer.getVerticalFacingAngle(), 0)
     for eventPlayer.num in range(len(Dots)):
-        if distance(DotsPos[eventPlayer.num], eventPlayer.click_pos) < 0.6:
+        if distance(DotsPos[eventPlayer.num], eventPlayer.click_pos) < 0.6 and eventPlayer.color == DotsNumber[eventPlayer.num]:
             destroyEffect(Dots[eventPlayer.num])
             createEffect(getAllPlayers(), Effect.SPHERE, ColorPalette[DotsNumber[eventPlayer.num]], DotsPos[eventPlayer.num] + vect(0, 0, -0.2), 0.5, EffectReeval.VISIBILITY)
             # DotsNumber[eventPlayer.num] = " "
             # text()
     waitUntil(distance(vect(0, 10.8, 20) + 0.1 * vect(eventPlayer.getHorizontalFacingAngle(), -1 * eventPlayer.getVerticalFacingAngle(), 0), eventPlayer.click_pos) > 0.5, 10)
     if RULE_CONDITION: goto RULE_START
+
+
+rule "Color Change":
+    @Event eachPlayer
+    @Condition Init
+    @Condition eventPlayer.isHoldingButton(Button.INTERACT)
+
+    destroyHudText(eventPlayer.color_hud[eventPlayer.color])
+    hudSubtext(localPlayer, eventPlayer.color, HudPosition.LEFT, eventPlayer.color, ColorPalette[eventPlayer.color], HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    eventPlayer.color_hud[eventPlayer.color] = getLastCreatedText()
+
+    eventPlayer.color += 1
+    if eventPlayer.color == len(ColorPalette): eventPlayer.color = 1
+    
+    destroyHudText(eventPlayer.color_hud[eventPlayer.color])
+    hudHeader(localPlayer, eventPlayer.color, HudPosition.LEFT, eventPlayer.color, ColorPalette[eventPlayer.color], HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+    eventPlayer.color_hud[eventPlayer.color] = getLastCreatedText()
