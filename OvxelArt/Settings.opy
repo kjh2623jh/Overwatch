@@ -2,7 +2,7 @@
 
 settings {
     "main": {
-        "modeName": "옵셀 페인터",
+        "modeName": "옵셀 아트",
         "description": "제작 훈제김치\r\n코드"
     },
     "lobby": {
