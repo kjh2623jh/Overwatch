@@ -1,4 +1,4 @@
-#!mainFile "OvxelPainter.opy"
+#!mainFile "OvxelArt.opy"
 
 settings {
     "main": {
